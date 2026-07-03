@@ -4,12 +4,10 @@ import { prisma } from "../config/prisma";
 
 describe("NoteRepository", () => {
   beforeEach(async () => {
-    // Clear notes before each test
     await prisma.note.deleteMany();
   });
 
   afterAll(async () => {
-    // Close database connection
     await prisma.$disconnect();
   });
 
@@ -23,7 +21,7 @@ describe("NoteRepository", () => {
     expect(created.id).toBeDefined();
     expect(created.title).toBe("Test Note");
     expect(created.content).toBe("This is test content");
-    expect(created.tags).toEqual(["tag1", "tag2"]);
+    expect(created.tags.sort()).toEqual(["tag1", "tag2"].sort());
 
     const found = await noteRepository.findById(created.id);
     expect(found).not.toBeNull();
@@ -51,7 +49,7 @@ describe("NoteRepository", () => {
     expect(updated.id).toBe(created.id);
     expect(updated.title).toBe("New Title");
     expect(updated.content).toBe("Original Content");
-    expect(updated.tags).toEqual(["tag1", "tag2"]);
+    expect(updated.tags.sort()).toEqual(["tag1", "tag2"].sort());
   });
 
   it("should delete a note and return the deleted note", async () => {
@@ -72,13 +70,11 @@ describe("NoteRepository", () => {
     await noteRepository.create({ title: "Bake Bread", content: "Need flour, water, yeast" });
     await noteRepository.create({ title: "Grocery list", content: "Buy apples and milk" });
 
-    // Search for 'Apple' or 'apples'
     const results = await noteRepository.search("apple");
     expect(results).toHaveLength(2);
     expect(results.map(r => r.title)).toContain("Apple Pie Recipe");
     expect(results.map(r => r.title)).toContain("Grocery list");
 
-    // Search for 'Bake'
     const results2 = await noteRepository.search("Bake");
     expect(results2).toHaveLength(2);
     expect(results2.map(r => r.title)).toContain("Apple Pie Recipe");
@@ -101,7 +97,6 @@ describe("NoteRepository", () => {
   });
 
   it("should paginate notes correctly", async () => {
-    // Seed 5 notes
     for (let i = 1; i <= 5; i++) {
       await noteRepository.create({
         title: `Note ${i}`,

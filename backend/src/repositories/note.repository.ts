@@ -1,27 +1,17 @@
 import { prisma } from "../config";
-import { Note } from "@prisma/client";
+import { Note, Tag } from "@prisma/client";
+import { NoteDomain } from "../types";
 
-export interface NoteDomain {
-  id: string;
-  title: string;
-  content: string;
-  tags: string[];
-  createdAt: Date;
-  updatedAt: Date;
-}
+export type NoteWithTags = Note & {
+  tags: Tag[];
+};
 
-function mapToDomain(note: Note): NoteDomain {
-  let tags: string[] = [];
-  try {
-    tags = JSON.parse(note.tags);
-  } catch {
-    tags = [];
-  }
+function mapToDomain(note: NoteWithTags): NoteDomain {
   return {
     id: note.id,
     title: note.title,
     content: note.content,
-    tags,
+    tags: note.tags.map((t) => t.name),
     createdAt: note.createdAt,
     updatedAt: note.updatedAt,
   };
@@ -29,13 +19,18 @@ function mapToDomain(note: Note): NoteDomain {
 
 export class NoteRepository {
   async create(data: { title: string; content: string; tags?: string[] }): Promise<NoteDomain> {
-    const serializedTags = JSON.stringify(data.tags || []);
     const note = await prisma.note.create({
       data: {
         title: data.title,
         content: data.content,
-        tags: serializedTags,
+        tags: data.tags ? {
+          connectOrCreate: data.tags.map((tag) => ({
+            where: { name: tag },
+            create: { name: tag },
+          })),
+        } : undefined,
       },
+      include: { tags: true },
     });
     return mapToDomain(note);
   }
@@ -43,6 +38,7 @@ export class NoteRepository {
   async findById(id: string): Promise<NoteDomain | null> {
     const note = await prisma.note.findUnique({
       where: { id },
+      include: { tags: true },
     });
     return note ? mapToDomain(note) : null;
   }
@@ -58,13 +54,16 @@ export class NoteRepository {
     }
 
     if (params?.tag) {
-      // In SQLite, check if the tags JSON string contains the tag substring.
-      // E.g., searching for the tag "work" matches if the column contains '"work"'
-      where.tags = { contains: `"${params.tag}"` };
+      where.tags = {
+        some: {
+          name: params.tag,
+        },
+      };
     }
 
     const notes = await prisma.note.findMany({
       where,
+      include: { tags: true },
       orderBy: { createdAt: "desc" },
     });
 
@@ -78,11 +77,20 @@ export class NoteRepository {
     const updateData: any = {};
     if (data.title !== undefined) updateData.title = data.title;
     if (data.content !== undefined) updateData.content = data.content;
-    if (data.tags !== undefined) updateData.tags = JSON.stringify(data.tags);
+    if (data.tags !== undefined) {
+      updateData.tags = {
+        set: [],
+        connectOrCreate: data.tags.map((tag) => ({
+          where: { name: tag },
+          create: { name: tag },
+        })),
+      };
+    }
 
     const note = await prisma.note.update({
       where: { id },
       data: updateData,
+      include: { tags: true },
     });
     return mapToDomain(note);
   }
@@ -90,6 +98,7 @@ export class NoteRepository {
   async delete(id: string): Promise<NoteDomain> {
     const note = await prisma.note.delete({
       where: { id },
+      include: { tags: true },
     });
     return mapToDomain(note);
   }
@@ -107,6 +116,7 @@ export class NoteRepository {
     const orderBy = options?.sortBy ? ({ [options.sortBy]: options.sortOrder || "desc" } as any) : undefined;
     const notes = await prisma.note.findMany({
       where,
+      include: { tags: true },
       take: options?.limit,
       skip: options?.offset,
       orderBy,
@@ -119,11 +129,16 @@ export class NoteRepository {
     options?: { limit?: number; offset?: number; sortBy?: string; sortOrder?: "asc" | "desc" }
   ): Promise<NoteDomain[]> {
     const where = {
-      tags: { contains: `"${tag}"` },
+      tags: {
+        some: {
+          name: tag,
+        },
+      },
     };
     const orderBy = options?.sortBy ? ({ [options.sortBy]: options.sortOrder || "desc" } as any) : undefined;
     const notes = await prisma.note.findMany({
       where,
+      include: { tags: true },
       take: options?.limit,
       skip: options?.offset,
       orderBy,
@@ -147,13 +162,18 @@ export class NoteRepository {
       ];
     }
     if (options.tag) {
-      where.tags = { contains: `"${options.tag}"` };
+      where.tags = {
+        some: {
+          name: options.tag,
+        },
+      };
     }
     const orderBy = options.sortBy ? ({ [options.sortBy]: options.sortOrder || "desc" } as any) : { createdAt: "desc" as const };
 
     const [notes, total] = await Promise.all([
       prisma.note.findMany({
         where,
+        include: { tags: true },
         take: options.limit,
         skip: options.offset,
         orderBy,
@@ -185,12 +205,17 @@ export class NoteRepository {
       ];
     }
     if (options.tag) {
-      where.tags = { contains: `"${options.tag}"` };
+      where.tags = {
+        some: {
+          name: options.tag,
+        },
+      };
     }
     const orderBy = { [options.sortBy]: options.sortOrder } as any;
 
     const notes = await prisma.note.findMany({
       where,
+      include: { tags: true },
       orderBy,
       take: options.limit,
       skip: options.offset,

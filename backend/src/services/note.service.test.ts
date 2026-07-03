@@ -5,12 +5,10 @@ import { ValidationError, NotFoundError } from "../utils";
 
 describe("NoteService", () => {
   beforeEach(async () => {
-    // Clear notes before each test
     await prisma.note.deleteMany();
   });
 
   afterAll(async () => {
-    // Close database connection
     await prisma.$disconnect();
   });
 
@@ -108,5 +106,21 @@ describe("NoteService", () => {
     await expect(
       noteService.deleteNote("non-existent-uuid")
     ).rejects.toThrow(NotFoundError);
+  });
+
+  it("should normalize and deduplicate tags during note creation and updates", async () => {
+    const created = await noteService.createNote({
+      title: "Normalization test",
+      content: "Checks lowercase, whitespace, duplicates",
+      tags: ["React", " react ", "REACT", "TypeScript", "typescript", "", " "],
+    });
+
+    expect(created.tags.sort()).toEqual(["react", "typescript"].sort());
+
+    const updated = await noteService.updateNote(created.id, {
+      tags: ["Next.js", "next.js", "   React  ", "react"],
+    });
+
+    expect(updated.tags.sort()).toEqual(["next.js", "react"].sort());
   });
 });

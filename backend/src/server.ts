@@ -8,9 +8,11 @@ const start = async () => {
   const host = config.host;
 
   try {
+    app.log.info({ port, host }, "Starting application server...");
     await app.listen({ port, host });
+    app.log.info("Application server started successfully");
   } catch (err) {
-    app.log.error(err);
+    app.log.error(err, "Failed to start application server");
     await disconnectPrisma();
     process.exit(1);
   }
@@ -19,7 +21,9 @@ const start = async () => {
 const gracefulShutdown = async (signal: string) => {
   app.log.info({ signal }, "Received signal, shutting down gracefully");
   try {
+    app.log.info("Closing HTTP server...");
     await app.close();
+    app.log.info("Disconnecting Prisma Client...");
     await disconnectPrisma();
     app.log.info("Shutdown complete");
     process.exit(0);

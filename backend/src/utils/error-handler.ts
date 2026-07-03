@@ -1,72 +1,113 @@
 import { FastifyError, FastifyReply, FastifyRequest } from "fastify";
 import { Prisma } from "@prisma/client";
+
+import { config } from "../config";
 import { ApiError } from "./api-error";
 import { errorResponse } from "./api-response";
-import { config } from "../config";
+import { prismaErrorMap } from "./error-messages";
+
+function handleApiError(error: ApiError, reply: FastifyReply) {
+  return reply.status(error.statusCode).send(errorResponse(error.message));
+}
+
+function handlePrismaKnownError(
+  error: Prisma.PrismaClientKnownRequestError,
+  reply: FastifyReply
+) {
+  const prismaError = prismaErrorMap[error.code];
+
+  if (!prismaError) {
+    return reply
+      .status(400)
+      .send(errorResponse("Unable to process the request."));
+  }
+
+  return reply
+    .status(prismaError.statusCode)
+    .send(errorResponse(prismaError.message));
+}
+
+function handleValidationError(
+  error: FastifyError,
+  reply: FastifyReply
+) {
+  const errors =
+    error.validation?.map((err) => ({
+      field:
+        err.instancePath?.replace("/", "") ||
+        (typeof err.params?.missingProperty === "string"
+          ? err.params.missingProperty
+          : "field"),
+      message: err.message ?? "Invalid value",
+      code: err.keyword,
+    })) ?? [];
+
+  return reply.status(400).send(
+    errorResponse("Validation failed.", errors)
+  );
+}
 
 export function errorHandler(
   error: FastifyError,
   request: FastifyRequest,
   reply: FastifyReply
 ): void {
-  // Log the error using the request logger
-  request.log.error(error);
+  request.log.error(
+    {
+      requestId: request.id,
+      method: request.method,
+      url: request.url,
+      error,
+    },
+    "Request failed"
+  );
 
-  // 1. Handle custom ApiError
+  // Business errors
   if (error instanceof ApiError) {
-    reply.status(error.statusCode).send(errorResponse(error.message));
+    handleApiError(error, reply);
     return;
   }
 
-  // 2. Handle Prisma errors
+  // Prisma known errors
   if (error instanceof Prisma.PrismaClientKnownRequestError) {
-    switch (error.code) {
-      case "P2002": // Unique constraint violation
-        reply.status(409).send(errorResponse("A record with this value already exists."));
-        return;
-      case "P2025": // Record not found
-        reply.status(404).send(errorResponse("Record not found."));
-        return;
-      case "P2003": // Foreign key constraint violation
-        reply.status(409).send(errorResponse("Foreign key constraint failed."));
-        return;
-      default:
-        reply.status(400).send(errorResponse("Database operation failed."));
-        return;
-    }
+    handlePrismaKnownError(error, reply);
+    return;
   }
 
+  // Prisma validation errors
   if (error instanceof Prisma.PrismaClientValidationError) {
-    reply.status(400).send(errorResponse("Database validation failed."));
+    reply
+      .status(400)
+      .send(errorResponse("Invalid data provided."));
     return;
   }
 
-  // 3. Handle Fastify validation errors
+  // Prisma initialization errors
+  if (error instanceof Prisma.PrismaClientInitializationError) {
+    reply
+      .status(503)
+      .send(errorResponse("Database service is currently unavailable."));
+    return;
+  }
+
+  // Fastify request validation
   if (error.validation) {
-    const errors = error.validation.map((err) => {
-      const field = err.instancePath
-        ? err.instancePath.substring(1)
-        : (err.params["missingProperty"] as string | undefined) || "field";
-      return {
-        field,
-        message: err.message || "Invalid value",
-        code: err.keyword,
-      };
-    });
-    const validationMessage = errors.map((err) => `${err.field} ${err.message}`).join(", ");
-    reply.status(400).send(errorResponse(`Validation failed: ${validationMessage}`, errors));
+    handleValidationError(error, reply);
     return;
   }
 
-  // 4. Handle other Fastify-specific errors with status code
+  // Fastify generated HTTP errors
   if (error.statusCode) {
     reply.status(error.statusCode).send(errorResponse(error.message));
     return;
   }
 
-  // 5. Handle unknown errors
-  const isProduction = config.nodeEnv === "production";
-  const errorMessage = isProduction ? "Internal server error" : error.message;
-  reply.status(500).send(errorResponse(errorMessage));
+  // Unknown errors
+  reply.status(500).send(
+    errorResponse(
+      config.nodeEnv === "production"
+        ? "Internal server error."
+        : error.message
+    )
+  );
 }
-

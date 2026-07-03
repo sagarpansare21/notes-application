@@ -41,3 +41,16 @@ export const getNotesQuerySchema = {
     tag: { type: "string" },
   },
 } as const;
+
+export const tagsResponseSchema = {
+  $id: "tagsResponse",
+  type: "array",
+  items: {
+    type: "object",
+    properties: {
+      id: { type: "string", format: "uuid" },
+      name: { type: "string" },
+    },
+    required: ["id", "name"],
+  },
+} as const;

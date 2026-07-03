@@ -1,5 +1,6 @@
-import { noteRepository, NoteDomain } from "../repositories/note.repository";
-import { NotFoundError, ValidationError } from "../utils";
+import { noteRepository } from "../repositories/note.repository";
+import { NotFoundError, ValidationError, normalizeTags } from "../utils";
+import { NoteDomain } from "../types";
 
 export class NoteService {
   async createNote(data: { title: string; content: string; tags?: string[] }): Promise<NoteDomain> {
@@ -12,7 +13,7 @@ export class NoteService {
     return noteRepository.create({
       title: data.title.trim(),
       content: data.content,
-      tags: data.tags,
+      tags: normalizeTags(data.tags),
     });
   }
 
@@ -101,7 +102,7 @@ export class NoteService {
     return noteRepository.update(id, {
       title: data.title ? data.title.trim() : undefined,
       content: data.content,
-      tags: data.tags,
+      tags: data.tags ? normalizeTags(data.tags) : undefined,
     });
   }
 
