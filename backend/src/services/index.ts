@@ -1,1 +1,1 @@
-//
+export * from "./note.service";
