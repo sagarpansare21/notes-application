@@ -2,6 +2,12 @@ import fastify, { FastifyInstance } from "fastify";
 import dotenv from "dotenv";
 import cors from "@fastify/cors";
 import { prismaPlugin, swaggerPlugin } from "./plugins";
+import {
+  noteResponseSchema,
+  createNoteSchema,
+  updateNoteSchema,
+  getNotesQuerySchema,
+} from "./schemas";
 
 // Load environment variables
 dotenv.config();
@@ -41,8 +47,15 @@ export function buildApp(): FastifyInstance {
   app.register(prismaPlugin);
   app.register(swaggerPlugin);
 
+  // Register reusable schemas
+  app.addSchema(noteResponseSchema);
+  app.addSchema(createNoteSchema);
+  app.addSchema(updateNoteSchema);
+  app.addSchema(getNotesQuerySchema);
+
   return app;
 }
+
 
 
 
