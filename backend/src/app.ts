@@ -1,5 +1,4 @@
 import fastify, { FastifyInstance } from "fastify";
-import dotenv from "dotenv";
 import cors from "@fastify/cors";
 import { prismaPlugin, swaggerPlugin } from "./plugins";
 import {
@@ -8,18 +7,15 @@ import {
   updateNoteSchema,
   getNotesQuerySchema,
 } from "./schemas";
-
-// Load environment variables
-dotenv.config();
-
-const logLevel = process.env["LOG_LEVEL"] || "info";
+import { errorHandler } from "./utils";
+import { config } from "./config";
 
 export function buildApp(): FastifyInstance {
   const app = fastify({
     logger: {
-      level: logLevel,
+      level: config.logLevel,
       transport:
-        process.env["NODE_ENV"] !== "production"
+        config.nodeEnv !== "production"
           ? {
               target: "pino-pretty",
               options: {
@@ -32,13 +28,9 @@ export function buildApp(): FastifyInstance {
   });
 
   // Register CORS
-  const isDev = process.env["NODE_ENV"] !== "production";
+  const isDev = config.nodeEnv !== "production";
   app.register(cors, {
-    origin: isDev
-      ? true
-      : process.env["CORS_ORIGIN"]
-      ? process.env["CORS_ORIGIN"].split(",")
-      : false,
+    origin: isDev ? true : config.corsOrigin || false,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     credentials: true,
   });
@@ -53,8 +45,13 @@ export function buildApp(): FastifyInstance {
   app.addSchema(updateNoteSchema);
   app.addSchema(getNotesQuerySchema);
 
+  // Set global error handler
+  app.setErrorHandler(errorHandler);
+
   return app;
 }
+
+
 
 
 

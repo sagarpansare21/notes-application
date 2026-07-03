@@ -2,6 +2,7 @@ import fp from "fastify-plugin";
 import { FastifyPluginAsync } from "fastify";
 import swagger from "@fastify/swagger";
 import swaggerUi from "@fastify/swagger-ui";
+import { config } from "../config";
 
 const swaggerPlugin: FastifyPluginAsync = fp(async (fastify) => {
   await fastify.register(swagger, {
@@ -13,7 +14,7 @@ const swaggerPlugin: FastifyPluginAsync = fp(async (fastify) => {
       },
       servers: [
         {
-          url: `http://localhost:${process.env["PORT"] || 3000}`,
+          url: `http://localhost:${config.port}`,
           description: "Development Server",
         },
       ],

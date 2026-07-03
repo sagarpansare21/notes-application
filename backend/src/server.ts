@@ -1,11 +1,11 @@
 import { buildApp } from "./app";
-import { disconnectPrisma } from "./config";
+import { disconnectPrisma, config } from "./config";
 
 const app = buildApp();
 
 const start = async () => {
-  const port = process.env["PORT"] ? parseInt(process.env["PORT"], 10) : 3000;
-  const host = process.env["HOST"] || "127.0.0.1";
+  const port = config.port;
+  const host = config.host;
 
   try {
     await app.listen({ port, host });
