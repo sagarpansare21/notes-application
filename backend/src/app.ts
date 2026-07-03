@@ -10,12 +10,19 @@ import {
   updateNoteSchema,
   getNotesQuerySchema,
   tagsResponseSchema,
+  apiErrorResponseSchema,
+  apiValidationErrorResponseSchema,
 } from "./schemas";
 import { errorHandler } from "./utils";
 import { config } from "./config";
 
 export function buildApp(): FastifyInstance {
   const app = fastify({
+    ajv: {
+      customOptions: {
+        keywords: ["example"],
+      },
+    },
     logger: {
       level: config.logLevel,
       serializers: {
@@ -75,6 +82,8 @@ export function buildApp(): FastifyInstance {
   app.addSchema(updateNoteSchema);
   app.addSchema(getNotesQuerySchema);
   app.addSchema(tagsResponseSchema);
+  app.addSchema(apiErrorResponseSchema);
+  app.addSchema(apiValidationErrorResponseSchema);
 
   // Set global error handler
   app.setErrorHandler(errorHandler);
