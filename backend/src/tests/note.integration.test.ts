@@ -336,4 +336,112 @@ describe("API Integration Tests (Fastify inject)", () => {
     expect(body.success).toBe(false);
     expect(body.message).toContain("Malformed JSON file");
   });
+
+  describe("Soft Delete and Permanent Delete Endpoints", () => {
+    it("should soft delete note, then verify it is not returned in normal GET but shows in GET /trash", async () => {
+      const createRes = await app.inject({
+        method: "POST",
+        url: "/api/v1/notes",
+        payload: { title: "Note to trash", content: "Test Content" }
+      });
+      const note = JSON.parse(createRes.payload).data;
+
+      // Soft delete
+      const delRes = await app.inject({
+        method: "DELETE",
+        url: `/api/v1/notes/${note.id}`
+      });
+      expect(delRes.statusCode).toBe(200);
+
+      // Verify normal query excludes it
+      const activeRes = await app.inject({
+        method: "GET",
+        url: "/api/v1/notes"
+      });
+      const activeNotes = JSON.parse(activeRes.payload).data;
+      expect(activeNotes.some((n: any) => n.id === note.id)).toBe(false);
+
+      // Verify getNote on soft deleted note returns 404
+      const singleRes = await app.inject({
+        method: "GET",
+        url: `/api/v1/notes/${note.id}`
+      });
+      expect(singleRes.statusCode).toBe(404);
+
+      // Verify trash query includes it
+      const trashRes = await app.inject({
+        method: "GET",
+        url: "/api/v1/trash"
+      });
+      const trashNotes = JSON.parse(trashRes.payload).data;
+      expect(trashNotes.some((n: any) => n.id === note.id)).toBe(true);
+    });
+
+    it("should restore a soft deleted note", async () => {
+      const createRes = await app.inject({
+        method: "POST",
+        url: "/api/v1/notes",
+        payload: { title: "To Restore", content: "Test Content" }
+      });
+      const note = JSON.parse(createRes.payload).data;
+
+      // Soft delete
+      await app.inject({
+        method: "DELETE",
+        url: `/api/v1/notes/${note.id}`
+      });
+
+      // Restore
+      const restoreRes = await app.inject({
+        method: "POST",
+        url: `/api/v1/notes/${note.id}/restore`
+      });
+      expect(restoreRes.statusCode).toBe(200);
+      expect(JSON.parse(restoreRes.payload).data.deletedAt).toBeNull();
+
+      // Verify it is back in active list
+      const activeRes = await app.inject({
+        method: "GET",
+        url: "/api/v1/notes"
+      });
+      const activeNotes = JSON.parse(activeRes.payload).data;
+      expect(activeNotes.some((n: any) => n.id === note.id)).toBe(true);
+    });
+
+    it("should permanently delete a soft deleted note and handle validation constraints", async () => {
+      const createRes = await app.inject({
+        method: "POST",
+        url: "/api/v1/notes",
+        payload: { title: "Permanent", content: "Test Content" }
+      });
+      const note = JSON.parse(createRes.payload).data;
+
+      // 400 when trying to permanently delete active note (not in trash)
+      const errRes = await app.inject({
+        method: "DELETE",
+        url: `/api/v1/trash/${note.id}`
+      });
+      expect(errRes.statusCode).toBe(400);
+
+      // Soft delete
+      await app.inject({
+        method: "DELETE",
+        url: `/api/v1/notes/${note.id}`
+      });
+
+      // Permanent delete
+      const permRes = await app.inject({
+        method: "DELETE",
+        url: `/api/v1/trash/${note.id}`
+      });
+      expect(permRes.statusCode).toBe(200);
+
+      // Verify 404 on subsequent get/permanent delete
+      const missingRes = await app.inject({
+        method: "DELETE",
+        url: `/api/v1/trash/${note.id}`
+      });
+      expect(missingRes.statusCode).toBe(404);
+    });
+  });
 });

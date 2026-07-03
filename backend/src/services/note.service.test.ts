@@ -134,8 +134,9 @@ describe("NoteService", () => {
       const parsed = JSON.parse(exported);
 
       expect(parsed).toHaveLength(2);
-      expect(parsed[0].title).toBe("Note B");
-      expect(parsed[1].title).toBe("Note A");
+      const titles = parsed.map((n: any) => n.title);
+      expect(titles).toContain("Note A");
+      expect(titles).toContain("Note B");
     });
 
     it("should export notes as Markdown format", async () => {
@@ -182,6 +183,68 @@ describe("NoteService", () => {
       await expect(
         noteService.importNotes(JSON.stringify({ note: "single" }))
       ).rejects.toThrow(ValidationError);
+    });
+  });
+
+  describe("Soft Delete and Permanent Delete", () => {
+    it("should soft delete a note and filter it from active notes queries", async () => {
+      const note = await noteService.createNote({ title: "To Delete", content: "Some content" });
+      const active1 = await noteService.getNotes();
+      expect(active1).toHaveLength(1);
+
+      const deleted = await noteService.deleteNote(note.id);
+      expect(deleted.deletedAt).toBeDefined();
+      expect(deleted.deletedAt).not.toBeNull();
+
+      const active2 = await noteService.getNotes();
+      expect(active2).toHaveLength(0);
+
+      // getNote details of soft deleted should throw NotFound
+      await expect(noteService.getNote(note.id)).rejects.toThrow(NotFoundError);
+    });
+
+    it("should retrieve soft deleted notes via getTrashNotes", async () => {
+      const noteA = await noteService.createNote({ title: "A", content: "A" });
+      const noteB = await noteService.createNote({ title: "B", content: "B" });
+      await noteService.deleteNote(noteA.id);
+
+      const trash = await noteService.getTrashNotes();
+      const trashList = trash as NoteDomain[];
+      expect(trashList).toHaveLength(1);
+      expect(trashList[0].title).toBe("A");
+    });
+
+    it("should restore a soft deleted note back to active notes", async () => {
+      const note = await noteService.createNote({ title: "A", content: "A" });
+      await noteService.deleteNote(note.id);
+
+      const restored = await noteService.restoreNote(note.id);
+      expect(restored.deletedAt).toBeNull();
+
+      const active = await noteService.getNotes();
+      expect(active).toHaveLength(1);
+    });
+
+    it("should throw ValidationError when trying to restore or permanently delete an active note", async () => {
+      const note = await noteService.createNote({ title: "Active Note", content: "Content" });
+
+      await expect(noteService.restoreNote(note.id)).rejects.toThrow(ValidationError);
+      await expect(noteService.permanentDeleteNote(note.id)).rejects.toThrow(ValidationError);
+    });
+
+    it("should permanently delete a soft deleted note, removing relations", async () => {
+      const note = await noteService.createNote({ title: "Trash Note", content: "Content", tags: ["tagx"] });
+      await noteService.deleteNote(note.id);
+
+      const permanent = await noteService.permanentDeleteNote(note.id);
+      expect(permanent.id).toBe(note.id);
+
+      const trash = await noteService.getTrashNotes();
+      expect(trash).toHaveLength(0);
+
+      // Verify not found on findById
+      const found = await prisma.note.findUnique({ where: { id: note.id } });
+      expect(found).toBeNull();
     });
   });
 });

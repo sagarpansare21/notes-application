@@ -315,4 +315,149 @@ export const noteRoutes: FastifyPluginAsync = async (fastify) => {
     },
     handler: noteController.importNotes,
   });
+
+  // Get trash notes
+  fastify.get("/trash", {
+    schema: {
+      summary: "Get soft deleted notes list",
+      description: "Retrieves a list of soft deleted notes. Supports optional search keywords, tag filtering, pagination, and sorting.",
+      tags: ["Notes"],
+      querystring: { $ref: "getNotesQuery#" },
+      response: {
+        200: {
+          description: "List of soft deleted notes retrieved successfully",
+          type: "object",
+          properties: {
+            success: { type: "boolean", example: true },
+            message: { type: "string", example: "Trash notes retrieved successfully" },
+            data: {
+              oneOf: [
+                {
+                  type: "array",
+                  items: { $ref: "noteResponse#" },
+                  description: "Simple list of soft deleted notes when pagination is not used",
+                },
+                {
+                  type: "object",
+                  description: "Paginated response object when limit and offset query params are provided",
+                  properties: {
+                    data: {
+                      type: "array",
+                      items: { $ref: "noteResponse#" },
+                    },
+                    total: { type: "integer", description: "Total count of soft deleted notes", example: 1 },
+                    limit: { type: "integer", description: "Page size limit used", example: 10 },
+                    offset: { type: "integer", description: "Offset index used", example: 0 },
+                  },
+                  required: ["data", "total", "limit", "offset"],
+                },
+              ],
+            },
+          },
+          required: ["success", "message", "data"],
+        },
+        400: {
+          description: "Invalid query parameters structure",
+          $ref: "getNotesValidationError#",
+        },
+        500: {
+          description: "Internal server error occurred",
+          $ref: "apiErrorResponse#",
+        },
+      },
+    },
+    handler: noteController.getTrashNotes,
+  });
+
+  // Restore note by ID
+  fastify.post("/notes/:id/restore", {
+    schema: {
+      summary: "Restore a soft deleted note by ID",
+      description: "Restores a soft deleted note back to active state by clearing its deletedAt timestamp.",
+      tags: ["Notes"],
+      params: {
+        type: "object",
+        description: "Path parameters",
+        properties: {
+          id: { 
+            type: "string", 
+            description: "Unique note identifier to restore",
+            example: "cb05a418-ed17-4a17-96dc-f777084fe4eb"
+          },
+        },
+        required: ["id"],
+      },
+      response: {
+        200: {
+          description: "Note restored successfully",
+          type: "object",
+          properties: {
+            success: { type: "boolean", example: true },
+            message: { type: "string", example: "Note restored successfully" },
+            data: { $ref: "noteResponse#" },
+          },
+          required: ["success", "message", "data"],
+        },
+        400: {
+          description: "Note is not in trash",
+          $ref: "apiErrorResponse#",
+        },
+        404: {
+          description: "Requested note was not found",
+          $ref: "apiErrorResponse#",
+        },
+        500: {
+          description: "Internal server error occurred",
+          $ref: "apiErrorResponse#",
+        },
+      },
+    },
+    handler: noteController.restoreNote,
+  });
+
+  // Permanent delete note by ID
+  fastify.delete("/trash/:id", {
+    schema: {
+      summary: "Permanently delete a note by ID",
+      description: "Physically removes a soft deleted note and all its associated tag relationships from the database.",
+      tags: ["Notes"],
+      params: {
+        type: "object",
+        description: "Path parameters",
+        properties: {
+          id: { 
+            type: "string", 
+            description: "Unique note identifier to delete permanently",
+            example: "cb05a418-ed17-4a17-96dc-f777084fe4eb"
+          },
+        },
+        required: ["id"],
+      },
+      response: {
+        200: {
+          description: "Note permanently deleted successfully",
+          type: "object",
+          properties: {
+            success: { type: "boolean", example: true },
+            message: { type: "string", example: "Note permanently deleted successfully" },
+            data: { $ref: "noteResponse#" },
+          },
+          required: ["success", "message", "data"],
+        },
+        400: {
+          description: "Note is not in trash",
+          $ref: "apiErrorResponse#",
+        },
+        404: {
+          description: "Requested note was not found",
+          $ref: "apiErrorResponse#",
+        },
+        500: {
+          description: "Internal server error occurred",
+          $ref: "apiErrorResponse#",
+        },
+      },
+    },
+    handler: noteController.permanentDeleteNote,
+  });
 };

@@ -78,6 +78,36 @@ export class NoteController {
       .status(200)
       .send(successResponse("Import completed.", summary));
   }
+
+  async getTrashNotes(request: any, reply: any) {
+    const { search, tag, limit, offset, sortBy, sortOrder } = request.query;
+
+    const parsedLimit = limit !== undefined ? parseInt(String(limit), 10) : undefined;
+    const parsedOffset = offset !== undefined ? parseInt(String(offset), 10) : undefined;
+
+    const result = await noteService.getTrashNotes({
+      search: search ? String(search) : undefined,
+      tag: tag ? String(tag) : undefined,
+      limit: isNaN(Number(parsedLimit)) ? undefined : parsedLimit,
+      offset: isNaN(Number(parsedOffset)) ? undefined : parsedOffset,
+      sortBy: sortBy ? String(sortBy) : undefined,
+      sortOrder: sortOrder === "asc" || sortOrder === "desc" ? sortOrder : undefined,
+    });
+
+    return reply.status(200).send(successResponse("Trash notes retrieved successfully", result));
+  }
+
+  async restoreNote(request: any, reply: any) {
+    const { id } = request.params;
+    const note = await noteService.restoreNote(id);
+    return reply.status(200).send(successResponse("Note restored successfully", note));
+  }
+
+  async permanentDeleteNote(request: any, reply: any) {
+    const { id } = request.params;
+    const note = await noteService.permanentDeleteNote(id);
+    return reply.status(200).send(successResponse("Note permanently deleted successfully", note));
+  }
 }
 
 export const noteController = new NoteController();

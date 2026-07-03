@@ -37,8 +37,14 @@ export const noteResponseSchema = {
       description: "Note last modification timestamp",
       example: "2026-07-04T01:35:00.000Z"
     },
+    deletedAt: {
+      type: ["string", "null"],
+      format: "date-time",
+      description: "Timestamp when the note was soft deleted, or null if active",
+      example: null
+    },
   },
-  required: ["id", "title", "content", "tags", "createdAt", "updatedAt"],
+  required: ["id", "title", "content", "tags", "createdAt", "updatedAt", "deletedAt"],
 } as const;
 
 export const createNoteSchema = {

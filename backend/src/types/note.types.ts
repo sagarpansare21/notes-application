@@ -5,6 +5,7 @@ export interface NoteDomain {
   tags: string[];
   createdAt: Date;
   updatedAt: Date;
+  deletedAt?: Date | null;
 }
 
 export interface CreateNoteInput {
@@ -26,4 +27,5 @@ export interface GetNotesParams {
   offset?: number;
   sortBy?: string;
   sortOrder?: "asc" | "desc";
+  onlyDeleted?: boolean;
 }

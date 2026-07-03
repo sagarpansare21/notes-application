@@ -14,6 +14,7 @@ function mapToDomain(note: NoteWithTags): NoteDomain {
     tags: note.tags.map((t) => t.name),
     createdAt: note.createdAt,
     updatedAt: note.updatedAt,
+    deletedAt: note.deletedAt,
   };
 }
 
@@ -35,16 +36,20 @@ export class NoteRepository {
     return mapToDomain(note);
   }
 
-  async findById(id: string): Promise<NoteDomain | null> {
+  async findById(id: string, includeDeleted = false): Promise<NoteDomain | null> {
     const note = await prisma.note.findUnique({
       where: { id },
       include: { tags: true },
     });
-    return note ? mapToDomain(note) : null;
+    if (!note) return null;
+    if (note.deletedAt && !includeDeleted) return null;
+    return mapToDomain(note);
   }
 
-  async findAll(params?: { search?: string; tag?: string }): Promise<NoteDomain[]> {
+  async findAll(params?: { search?: string; tag?: string; onlyDeleted?: boolean }): Promise<NoteDomain[]> {
     const where: any = {};
+
+    where.deletedAt = params?.onlyDeleted ? { not: null } : null;
 
     if (params?.search) {
       where.OR = [
@@ -96,8 +101,9 @@ export class NoteRepository {
   }
 
   async delete(id: string): Promise<NoteDomain> {
-    const note = await prisma.note.delete({
+    const note = await prisma.note.update({
       where: { id },
+      data: { deletedAt: new Date() },
       include: { tags: true },
     });
     return mapToDomain(note);
@@ -105,9 +111,10 @@ export class NoteRepository {
 
   async search(
     query: string,
-    options?: { limit?: number; offset?: number; sortBy?: string; sortOrder?: "asc" | "desc" }
+    options?: { limit?: number; offset?: number; sortBy?: string; sortOrder?: "asc" | "desc"; onlyDeleted?: boolean }
   ): Promise<NoteDomain[]> {
-    const where = {
+    const where: any = {
+      deletedAt: options?.onlyDeleted ? { not: null } : null,
       OR: [
         { title: { contains: query } },
         { content: { contains: query } },
@@ -126,9 +133,10 @@ export class NoteRepository {
 
   async filterByTag(
     tag: string,
-    options?: { limit?: number; offset?: number; sortBy?: string; sortOrder?: "asc" | "desc" }
+    options?: { limit?: number; offset?: number; sortBy?: string; sortOrder?: "asc" | "desc"; onlyDeleted?: boolean }
   ): Promise<NoteDomain[]> {
-    const where = {
+    const where: any = {
+      deletedAt: options?.onlyDeleted ? { not: null } : null,
       tags: {
         some: {
           name: tag,
@@ -153,8 +161,11 @@ export class NoteRepository {
     tag?: string;
     sortBy?: string;
     sortOrder?: "asc" | "desc";
+    onlyDeleted?: boolean;
   }): Promise<{ data: NoteDomain[]; total: number; limit: number; offset: number }> {
-    const where: any = {};
+    const where: any = {
+      deletedAt: options.onlyDeleted ? { not: null } : null,
+    };
     if (options.search) {
       where.OR = [
         { title: { contains: options.search } },
@@ -196,8 +207,11 @@ export class NoteRepository {
     tag?: string;
     limit?: number;
     offset?: number;
+    onlyDeleted?: boolean;
   }): Promise<NoteDomain[]> {
-    const where: any = {};
+    const where: any = {
+      deletedAt: options.onlyDeleted ? { not: null } : null,
+    };
     if (options.search) {
       where.OR = [
         { title: { contains: options.search } },
@@ -245,6 +259,33 @@ export class NoteRepository {
         },
       });
       return "imported";
+    });
+  }
+
+  async restore(id: string): Promise<NoteDomain> {
+    const note = await prisma.note.update({
+      where: { id },
+      data: { deletedAt: null },
+      include: { tags: true },
+    });
+    return mapToDomain(note);
+  }
+
+  async hardDelete(id: string): Promise<NoteDomain> {
+    return await prisma.$transaction(async (tx) => {
+      await tx.note.update({
+        where: { id },
+        data: {
+          tags: {
+            set: [],
+          },
+        },
+      });
+      const note = await tx.note.delete({
+        where: { id },
+        include: { tags: true },
+      });
+      return mapToDomain(note);
     });
   }
 }

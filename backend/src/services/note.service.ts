@@ -1,6 +1,6 @@
 import { noteRepository } from "../repositories/note.repository";
 import { NotFoundError, ValidationError, normalizeTags } from "../utils";
-import { NoteDomain } from "../types";
+import { NoteDomain, GetNotesParams } from "../types";
 
 export class NoteService {
   async createNote(data: { title: string; content: string; tags?: string[] }): Promise<NoteDomain> {
@@ -17,15 +17,7 @@ export class NoteService {
     });
   }
 
-  async getNotes(params?: {
-    search?: string;
-    tag?: string;
-    limit?: number;
-    offset?: number;
-    sortBy?: string;
-    sortOrder?: "asc" | "desc";
-  }) {
-    // If limit and offset are provided, perform pagination
+  async getNotes(params?: GetNotesParams) {
     if (params?.limit !== undefined && params?.offset !== undefined) {
       return noteRepository.pagination({
         limit: params.limit,
@@ -34,6 +26,7 @@ export class NoteService {
         tag: params.tag,
         sortBy: params.sortBy,
         sortOrder: params.sortOrder,
+        onlyDeleted: params.onlyDeleted,
       });
     }
 
@@ -46,6 +39,7 @@ export class NoteService {
         tag: params.tag,
         limit: params.limit,
         offset: params.offset,
+        onlyDeleted: params.onlyDeleted,
       });
     }
 
@@ -54,6 +48,7 @@ export class NoteService {
       return noteRepository.filterByTag(params.tag, {
         limit: params.limit,
         offset: params.offset,
+        onlyDeleted: params.onlyDeleted,
       });
     }
 
@@ -62,6 +57,7 @@ export class NoteService {
       return noteRepository.search(params.search, {
         limit: params.limit,
         offset: params.offset,
+        onlyDeleted: params.onlyDeleted,
       });
     }
 
@@ -74,7 +70,7 @@ export class NoteService {
       throw new ValidationError("ID is required");
     }
     const note = await noteRepository.findById(id);
-    if (!note) {
+    if (!note || note.deletedAt) {
       throw new NotFoundError("Note not found");
     }
     return note;
@@ -88,13 +84,11 @@ export class NoteService {
       throw new ValidationError("ID is required");
     }
 
-    // Check if exists
     const existing = await noteRepository.findById(id);
-    if (!existing) {
+    if (!existing || existing.deletedAt) {
       throw new NotFoundError("Note not found");
     }
 
-    // Validate inputs if provided
     if (data.title !== undefined && data.title.trim() === "") {
       throw new ValidationError("Title cannot be empty");
     }
@@ -111,9 +105,8 @@ export class NoteService {
       throw new ValidationError("ID is required");
     }
 
-    // Check if exists
     const existing = await noteRepository.findById(id);
-    if (!existing) {
+    if (!existing || existing.deletedAt) {
       throw new NotFoundError("Note not found");
     }
 
@@ -205,6 +198,37 @@ export class NoteService {
 
     return { imported, skipped, failed };
   }
-}
 
+  async getTrashNotes(params: GetNotesParams = {}) {
+    return this.getNotes({ ...params, onlyDeleted: true });
+  }
+
+  async restoreNote(id: string): Promise<NoteDomain> {
+    if (!id) {
+      throw new ValidationError("ID is required");
+    }
+    const existing = await noteRepository.findById(id, true);
+    if (!existing) {
+      throw new NotFoundError("Note not found");
+    }
+    if (!existing.deletedAt) {
+      throw new ValidationError("Note is not in trash");
+    }
+    return noteRepository.restore(id);
+  }
+
+  async permanentDeleteNote(id: string): Promise<NoteDomain> {
+    if (!id) {
+      throw new ValidationError("ID is required");
+    }
+    const existing = await noteRepository.findById(id, true);
+    if (!existing) {
+      throw new NotFoundError("Note not found");
+    }
+    if (!existing.deletedAt) {
+      throw new ValidationError("Note is not in trash");
+    }
+    return noteRepository.hardDelete(id);
+  }
+}
 export const noteService = new NoteService();
