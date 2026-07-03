@@ -22,7 +22,7 @@ export const noteRoutes: FastifyPluginAsync = async (fastify) => {
         },
         400: {
           description: "Invalid request payload or validation constraint violation",
-          $ref: "apiValidationErrorResponse#",
+          $ref: "createNoteValidationError#",
         },
         500: {
           description: "Internal server error occurred",
@@ -72,6 +72,10 @@ export const noteRoutes: FastifyPluginAsync = async (fastify) => {
             },
           },
           required: ["success", "message", "data"],
+        },
+        400: {
+          description: "Invalid query parameters structure",
+          $ref: "getNotesValidationError#",
         },
         500: {
           description: "Internal server error occurred",
@@ -156,7 +160,7 @@ export const noteRoutes: FastifyPluginAsync = async (fastify) => {
         },
         400: {
           description: "Invalid request fields or validation constraint failure",
-          $ref: "apiValidationErrorResponse#",
+          $ref: "updateNoteValidationError#",
         },
         404: {
           description: "Requested note was not found",
@@ -237,5 +241,78 @@ export const noteRoutes: FastifyPluginAsync = async (fastify) => {
       },
     },
     handler: tagController.getTags,
+  });
+
+  // Export notes
+  fastify.get("/notes/export", {
+    schema: {
+      summary: "Export all active notes",
+      description: "Retrieves notes and returns them as a downloadable JSON or Markdown file.",
+      tags: ["Notes"],
+      querystring: {
+        type: "object",
+        properties: {
+          format: {
+            type: "string",
+            enum: ["json", "markdown"],
+            description: "Export file format format",
+            default: "json",
+          },
+        },
+      },
+      response: {
+        200: {
+          description: "Downloadable export file output",
+          type: "string",
+        },
+        400: {
+          description: "Invalid format argument",
+          $ref: "exportNotesValidationError#",
+        },
+        500: {
+          description: "Internal server error",
+          $ref: "apiErrorResponse#",
+        },
+      },
+    },
+    handler: noteController.exportNotes,
+  });
+
+  // Import notes
+  fastify.post("/notes/import", {
+    schema: {
+      summary: "Import multiple notes from JSON file",
+      description: "Accepts a JSON file upload (multipart/form-data) containing an array of notes to import.",
+      tags: ["Notes"],
+      response: {
+        200: {
+          description: "Import statistics report summary",
+          type: "object",
+          properties: {
+            success: { type: "boolean", example: true },
+            message: { type: "string", example: "Import completed." },
+            data: {
+              type: "object",
+              properties: {
+                imported: { type: "integer", example: 18 },
+                skipped: { type: "integer", example: 2 },
+                failed: { type: "integer", example: 0 },
+              },
+              required: ["imported", "skipped", "failed"],
+            },
+          },
+          required: ["success", "message", "data"],
+        },
+        400: {
+          description: "Malformed JSON file or structure",
+          $ref: "importNotesValidationError#",
+        },
+        500: {
+          description: "Internal server error",
+          $ref: "apiErrorResponse#",
+        },
+      },
+    },
+    handler: noteController.importNotes,
   });
 };

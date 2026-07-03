@@ -223,5 +223,29 @@ export class NoteRepository {
 
     return notes.map(mapToDomain);
   }
+
+  async importNote(data: { title: string; content: string; tags: string[] }): Promise<'imported' | 'skipped'> {
+    return await prisma.$transaction(async (tx) => {
+      const exists = await tx.note.findFirst({
+        where: { title: data.title, content: data.content },
+      });
+      if (exists) {
+        return "skipped";
+      }
+      await tx.note.create({
+        data: {
+          title: data.title,
+          content: data.content,
+          tags: {
+            connectOrCreate: data.tags.map((tag) => ({
+              where: { name: tag },
+              create: { name: tag },
+            })),
+          },
+        },
+      });
+      return "imported";
+    });
+  }
 }
 export const noteRepository = new NoteRepository();

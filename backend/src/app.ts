@@ -2,6 +2,7 @@ import fastify, { FastifyInstance } from "fastify";
 import cors from "@fastify/cors";
 import helmet from "@fastify/helmet";
 import compress from "@fastify/compress";
+import multipart from "@fastify/multipart";
 import { prismaPlugin, swaggerPlugin } from "./plugins";
 import { noteRoutes } from "./routes";
 import {
@@ -12,6 +13,11 @@ import {
   tagsResponseSchema,
   apiErrorResponseSchema,
   apiValidationErrorResponseSchema,
+  createNoteValidationErrorSchema,
+  getNotesValidationErrorSchema,
+  updateNoteValidationErrorSchema,
+  exportNotesValidationErrorSchema,
+  importNotesValidationErrorSchema,
 } from "./schemas";
 import { errorHandler } from "./utils";
 import { config } from "./config";
@@ -69,6 +75,13 @@ export function buildApp(): FastifyInstance {
   // Register response compression
   app.register(compress);
 
+  // Register multipart upload support
+  app.register(multipart, {
+    limits: {
+      fileSize: 10 * 1024 * 1024, // 10MB
+    },
+  });
+
   // Register plugins
   app.register(prismaPlugin);
   if (isDev) {
@@ -84,6 +97,11 @@ export function buildApp(): FastifyInstance {
   app.addSchema(tagsResponseSchema);
   app.addSchema(apiErrorResponseSchema);
   app.addSchema(apiValidationErrorResponseSchema);
+  app.addSchema(createNoteValidationErrorSchema);
+  app.addSchema(getNotesValidationErrorSchema);
+  app.addSchema(updateNoteValidationErrorSchema);
+  app.addSchema(exportNotesValidationErrorSchema);
+  app.addSchema(importNotesValidationErrorSchema);
 
   // Set global error handler
   app.setErrorHandler(errorHandler);

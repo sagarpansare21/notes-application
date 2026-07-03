@@ -119,6 +119,92 @@ export class NoteService {
 
     return noteRepository.delete(id);
   }
+
+  async exportNotes(format: string): Promise<string> {
+    const normalizedFormat = format.trim().toLowerCase();
+    if (normalizedFormat !== "json" && normalizedFormat !== "markdown") {
+      throw new ValidationError("Unsupported export format");
+    }
+
+    const notes = await noteRepository.findAll();
+
+    if (normalizedFormat === "json") {
+      const notesJson = notes.map((n) => ({
+        title: n.title,
+        content: n.content,
+        tags: n.tags,
+        createdAt: n.createdAt,
+        updatedAt: n.updatedAt,
+      }));
+      return JSON.stringify(notesJson, null, 2);
+    } else {
+      const md = notes
+        .map((n) => {
+          const tagLines = n.tags.map((t) => `- ${t}`).join("\n");
+          const tagsSection = tagLines ? `Tags:\n${tagLines}` : "Tags:";
+          return `# ${n.title}\n\n${n.content}\n\n${tagsSection}\n\nCreated:\n${n.createdAt.toISOString()}\n\nUpdated:\n${n.updatedAt.toISOString()}\n\n---`;
+        })
+        .join("\n\n");
+      return md;
+    }
+  }
+
+  async importNotes(fileContent: string): Promise<{ imported: number; skipped: number; failed: number }> {
+    let notes: any;
+    try {
+      notes = JSON.parse(fileContent);
+    } catch {
+      throw new ValidationError("Malformed JSON file");
+    }
+
+    if (!Array.isArray(notes)) {
+      throw new ValidationError("JSON file must contain an array of notes");
+    }
+
+    let imported = 0;
+    let skipped = 0;
+    let failed = 0;
+
+    for (const note of notes) {
+      if (!note || typeof note !== "object") {
+        failed++;
+        continue;
+      }
+      const { title, content, tags } = note;
+      if (!title || typeof title !== "string" || title.trim() === "") {
+        failed++;
+        continue;
+      }
+      if (content === undefined || content === null || typeof content !== "string") {
+        failed++;
+        continue;
+      }
+      if (tags !== undefined) {
+        if (!Array.isArray(tags) || !tags.every((t) => typeof t === "string")) {
+          failed++;
+          continue;
+        }
+      }
+
+      try {
+        const normalizedTags = normalizeTags(tags || []);
+        const result = await noteRepository.importNote({
+          title: title.trim(),
+          content: content,
+          tags: normalizedTags,
+        });
+        if (result === "imported") {
+          imported++;
+        } else {
+          skipped++;
+        }
+      } catch {
+        failed++;
+      }
+    }
+
+    return { imported, skipped, failed };
+  }
 }
 
 export const noteService = new NoteService();

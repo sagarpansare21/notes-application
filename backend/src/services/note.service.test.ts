@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, afterAll } from "vitest";
 import { noteService } from "./note.service";
 import { prisma } from "../config/prisma";
 import { ValidationError, NotFoundError } from "../utils";
+import { NoteDomain } from "../types";
 
 describe("NoteService", () => {
   beforeEach(async () => {
@@ -122,5 +123,65 @@ describe("NoteService", () => {
     });
 
     expect(updated.tags.sort()).toEqual(["next.js", "react"].sort());
+  });
+
+  describe("Export and Import Notes", () => {
+    it("should export notes as JSON format", async () => {
+      await noteService.createNote({ title: "Note A", content: "Content A", tags: ["tagA"] });
+      await noteService.createNote({ title: "Note B", content: "Content B" });
+
+      const exported = await noteService.exportNotes("json");
+      const parsed = JSON.parse(exported);
+
+      expect(parsed).toHaveLength(2);
+      expect(parsed[0].title).toBe("Note B");
+      expect(parsed[1].title).toBe("Note A");
+    });
+
+    it("should export notes as Markdown format", async () => {
+      await noteService.createNote({ title: "Markdown Title", content: "Markdown Content", tags: ["tag1"] });
+
+      const exported = await noteService.exportNotes("markdown");
+      expect(exported).toContain("# Markdown Title");
+      expect(exported).toContain("Markdown Content");
+      expect(exported).toContain("Tags:\n- tag1");
+      expect(exported).toContain("Created:");
+      expect(exported).toContain("---");
+    });
+
+    it("should import notes validating structures, handling duplicates and skipping malformed tags", async () => {
+      await noteService.createNote({ title: "Existing", content: "Same body", tags: ["tag1"] });
+
+      const fileData = [
+        { title: "New Note", content: "New Content", tags: ["new-tag", "  New-tag ", ""] },
+        { title: "Existing", content: "Same body", tags: ["other"] },
+        { title: "Bad Note", tags: ["some"] },
+        { content: "No Title" },
+      ];
+
+      const result = await noteService.importNotes(JSON.stringify(fileData));
+
+      expect(result.imported).toBe(1);
+      expect(result.skipped).toBe(1);
+      expect(result.failed).toBe(2);
+
+      const notes = await noteService.getNotes();
+      const list = notes as NoteDomain[];
+      const importedNote = list.find((n) => n.title === "New Note");
+      expect(importedNote).toBeDefined();
+      expect(importedNote?.tags).toEqual(["new-tag"]);
+    });
+
+    it("should throw ValidationError for malformed JSON during import", async () => {
+      await expect(
+        noteService.importNotes("invalid-json{")
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it("should throw ValidationError if JSON content is not an array during import", async () => {
+      await expect(
+        noteService.importNotes(JSON.stringify({ note: "single" }))
+      ).rejects.toThrow(ValidationError);
+    });
   });
 });

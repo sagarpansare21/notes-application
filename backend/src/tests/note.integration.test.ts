@@ -174,4 +174,166 @@ describe("API Integration Tests (Fastify inject)", () => {
     expect(body.data[2].name).toBe("zebra");
     expect(body.data[0].id).toBeDefined();
   });
+
+  it("GET /api/v1/notes/export?format=json - should export notes as JSON attachment", async () => {
+    await app.inject({
+      method: "POST",
+      url: "/api/v1/notes",
+      payload: { title: "Export Json", content: "Json Content" },
+    });
+
+    const response = await app.inject({
+      method: "GET",
+      url: "/api/v1/notes/export?format=json",
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.headers["content-disposition"]).toContain('attachment; filename="notes.json"');
+    expect(response.headers["content-type"]).toContain("application/json");
+
+    const parsed = JSON.parse(response.payload);
+    expect(parsed).toBeInstanceOf(Array);
+    expect(parsed.some((n: any) => n.title === "Export Json")).toBe(true);
+  });
+
+  it("GET /api/v1/notes/export?format=markdown - should export notes as Markdown attachment", async () => {
+    await app.inject({
+      method: "POST",
+      url: "/api/v1/notes",
+      payload: { title: "Export Markdown", content: "Markdown Content" },
+    });
+
+    const response = await app.inject({
+      method: "GET",
+      url: "/api/v1/notes/export?format=markdown",
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.headers["content-disposition"]).toContain('attachment; filename="notes.md"');
+    expect(response.headers["content-type"]).toContain("text/markdown");
+    expect(response.payload).toContain("# Export Markdown");
+  });
+
+  it("POST /api/v1/notes/import - should import notes successfully from JSON multipart payload", async () => {
+    const payloadNotes = [
+      { title: "Import Note 1", content: "Import Content 1", tags: ["a", "b"] },
+      { title: "Import Note 2", content: "Import Content 2" }
+    ];
+
+    const boundary = "------WebKitFormBoundary7MA4YWxkTrZu0gW";
+    const payload = [
+      `--${boundary}`,
+      'Content-Disposition: form-data; name="file"; filename="notes.json"',
+      "Content-Type: application/json",
+      "",
+      JSON.stringify(payloadNotes),
+      `--${boundary}--`
+    ].join("\r\n");
+
+    const response = await app.inject({
+      method: "POST",
+      url: "/api/v1/notes/import",
+      headers: {
+        "content-type": `multipart/form-data; boundary=${boundary}`
+      },
+      payload
+    });
+
+    expect(response.statusCode).toBe(200);
+    const body = JSON.parse(response.payload);
+    expect(body.success).toBe(true);
+    expect(body.data.imported).toBe(2);
+    expect(body.data.skipped).toBe(0);
+    expect(body.data.failed).toBe(0);
+  });
+
+  it("POST /api/v1/notes/import - should skip duplicate notes", async () => {
+    await app.inject({
+      method: "POST",
+      url: "/api/v1/notes",
+      payload: { title: "Duplicate Note", content: "Existing Content" },
+    });
+
+    const payloadNotes = [
+      { title: "Duplicate Note", content: "Existing Content" },
+      { title: "Unique Note", content: "New Content" }
+    ];
+
+    const boundary = "------WebKitFormBoundary7MA4YWxkTrZu0gW";
+    const payload = [
+      `--${boundary}`,
+      'Content-Disposition: form-data; name="file"; filename="notes.json"',
+      "Content-Type: application/json",
+      "",
+      JSON.stringify(payloadNotes),
+      `--${boundary}--`
+    ].join("\r\n");
+
+    const response = await app.inject({
+      method: "POST",
+      url: "/api/v1/notes/import",
+      headers: {
+        "content-type": `multipart/form-data; boundary=${boundary}`
+      },
+      payload
+    });
+
+    expect(response.statusCode).toBe(200);
+    const body = JSON.parse(response.payload);
+    expect(body.data.imported).toBe(1);
+    expect(body.data.skipped).toBe(1);
+    expect(body.data.failed).toBe(0);
+  });
+
+  it("POST /api/v1/notes/import - should return 400 validation error for invalid file extension", async () => {
+    const boundary = "------WebKitFormBoundary7MA4YWxkTrZu0gW";
+    const payload = [
+      `--${boundary}`,
+      'Content-Disposition: form-data; name="file"; filename="notes.txt"',
+      "Content-Type: text/plain",
+      "",
+      "some plain text content",
+      `--${boundary}--`
+    ].join("\r\n");
+
+    const response = await app.inject({
+      method: "POST",
+      url: "/api/v1/notes/import",
+      headers: {
+        "content-type": `multipart/form-data; boundary=${boundary}`
+      },
+      payload
+    });
+
+    expect(response.statusCode).toBe(400);
+    const body = JSON.parse(response.payload);
+    expect(body.success).toBe(false);
+    expect(body.message).toContain("Only JSON files are supported");
+  });
+
+  it("POST /api/v1/notes/import - should return 400 for malformed JSON structure", async () => {
+    const boundary = "------WebKitFormBoundary7MA4YWxkTrZu0gW";
+    const payload = [
+      `--${boundary}`,
+      'Content-Disposition: form-data; name="file"; filename="notes.json"',
+      "Content-Type: application/json",
+      "",
+      "invalid-json{[",
+      `--${boundary}--`
+    ].join("\r\n");
+
+    const response = await app.inject({
+      method: "POST",
+      url: "/api/v1/notes/import",
+      headers: {
+        "content-type": `multipart/form-data; boundary=${boundary}`
+      },
+      payload
+    });
+
+    expect(response.statusCode).toBe(400);
+    const body = JSON.parse(response.payload);
+    expect(body.success).toBe(false);
+    expect(body.message).toContain("Malformed JSON file");
+  });
 });

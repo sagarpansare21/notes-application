@@ -218,3 +218,106 @@ export const apiValidationErrorResponseSchema = {
   },
   required: ["success", "message"],
 } as const;
+
+export const createNoteValidationErrorSchema = {
+  $id: "createNoteValidationError",
+  type: "object",
+  description: "Create Note request validation error details",
+  properties: {
+    success: { type: "boolean", example: false },
+    message: { type: "string", example: "Validation failed." },
+    errors: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          field: { type: "string", example: "title" },
+          message: { type: "string", example: "must have required property 'title'" },
+          code: { type: "string", example: "required" },
+        },
+        required: ["field", "message"],
+      },
+    },
+  },
+  required: ["success", "message"],
+} as const;
+
+export const getNotesValidationErrorSchema = {
+  $id: "getNotesValidationError",
+  type: "object",
+  description: "Get Notes query validation error details",
+  properties: {
+    success: { type: "boolean", example: false },
+    message: { type: "string", example: "Validation failed." },
+    errors: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          field: { type: "string", example: "sortOrder" },
+          message: { type: "string", example: "must be equal to one of the allowed values" },
+          code: { type: "string", example: "enum" },
+        },
+        required: ["field", "message"],
+      },
+    },
+  },
+  required: ["success", "message"],
+} as const;
+
+export const updateNoteValidationErrorSchema = {
+  $id: "updateNoteValidationError",
+  type: "object",
+  description: "Update Note request validation error details",
+  properties: {
+    success: { type: "boolean", example: false },
+    message: { type: "string", example: "Validation failed." },
+    errors: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          field: { type: "string", example: "title" },
+          message: { type: "string", example: "must NOT have fewer than 1 characters" },
+          code: { type: "string", example: "minLength" },
+        },
+        required: ["field", "message"],
+      },
+    },
+  },
+  required: ["success", "message"],
+} as const;
+
+export const exportNotesValidationErrorSchema = {
+  $id: "exportNotesValidationError",
+  type: "object",
+  description: "Export Notes query validation error details",
+  properties: {
+    success: { type: "boolean", example: false },
+    message: { type: "string", example: "Validation failed." },
+    errors: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          field: { type: "string", example: "format" },
+          message: { type: "string", example: "must be equal to one of the allowed values" },
+          code: { type: "string", example: "enum" },
+        },
+        required: ["field", "message"],
+      },
+    },
+  },
+  required: ["success", "message"],
+} as const;
+
+export const importNotesValidationErrorSchema = {
+  $id: "importNotesValidationError",
+  type: "object",
+  description: "Import Notes request error details",
+  properties: {
+    success: { type: "boolean", example: false },
+    message: { type: "string", example: "Only JSON files are supported for import" },
+  },
+  required: ["success", "message"],
+} as const;

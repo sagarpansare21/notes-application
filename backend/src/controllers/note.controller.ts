@@ -1,5 +1,5 @@
 import { noteService } from "../services";
-import { successResponse } from "../utils";
+import { successResponse, ValidationError } from "../utils";
 
 export class NoteController {
   async createNote(request: any, reply: any) {
@@ -43,6 +43,40 @@ export class NoteController {
     const { id } = request.params;
     const note = await noteService.deleteNote(id);
     return reply.status(200).send(successResponse("Note deleted successfully", note));
+  }
+
+  async exportNotes(request: any, reply: any) {
+    const format = request.query.format || "json";
+    const content = await noteService.exportNotes(String(format));
+
+    const filename = format === "markdown" ? "notes.md" : "notes.json";
+    const contentType = format === "markdown" ? "text/markdown" : "application/json";
+
+    return reply
+      .status(200)
+      .header("Content-Disposition", `attachment; filename="${filename}"`)
+      .header("Content-Type", contentType)
+      .send(content);
+  }
+
+  async importNotes(request: any, reply: any) {
+    const fileData = await request.file();
+    if (!fileData) {
+      throw new ValidationError("No file uploaded");
+    }
+
+    if (!fileData.filename.endsWith(".json")) {
+      throw new ValidationError("Only JSON files are supported for import");
+    }
+
+    const buffer = await fileData.toBuffer();
+    const fileContent = buffer.toString("utf-8");
+
+    const summary = await noteService.importNotes(fileContent);
+
+    return reply
+      .status(200)
+      .send(successResponse("Import completed.", summary));
   }
 }
 
