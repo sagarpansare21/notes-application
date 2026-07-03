@@ -1,7 +1,7 @@
 import fastify, { FastifyInstance } from "fastify";
 import dotenv from "dotenv";
 import cors from "@fastify/cors";
-import { prismaPlugin } from "./plugins";
+import { prismaPlugin, swaggerPlugin } from "./plugins";
 
 // Load environment variables
 dotenv.config();
@@ -39,8 +39,10 @@ export function buildApp(): FastifyInstance {
 
   // Register plugins
   app.register(prismaPlugin);
+  app.register(swaggerPlugin);
 
   return app;
 }
+
 
 
