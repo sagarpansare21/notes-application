@@ -1,5 +1,6 @@
 import fastify, { FastifyInstance } from "fastify";
 import dotenv from "dotenv";
+import cors from "@fastify/cors";
 import { prismaPlugin } from "./plugins";
 
 // Load environment variables
@@ -24,9 +25,22 @@ export function buildApp(): FastifyInstance {
     },
   });
 
+  // Register CORS
+  const isDev = process.env["NODE_ENV"] !== "production";
+  app.register(cors, {
+    origin: isDev
+      ? true
+      : process.env["CORS_ORIGIN"]
+      ? process.env["CORS_ORIGIN"].split(",")
+      : false,
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    credentials: true,
+  });
+
   // Register plugins
   app.register(prismaPlugin);
 
   return app;
 }
+
 
