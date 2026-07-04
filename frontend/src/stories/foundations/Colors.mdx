@@ -1,0 +1,52 @@
+import { Meta, ColorPalette, ColorItem } from '@storybook/addon-docs/blocks';
+
+<Meta title="Foundations/Colors" />
+
+# Color System
+
+Our color palette is carefully calibrated using modern HSL and OKLCH color spaces, drawing design inspiration from Notion's clean structures and Linear's dark, premium interfaces.
+
+---
+
+## Palette Overview
+
+Each color is mapped to CSS variables and Tailwind classes. We support a reactive Light/Dark theme mapping.
+
+<ColorPalette>
+  <ColorItem
+    title="theme.color.primary"
+    subtitle="Primary & Brand Actions"
+    colors={{
+      'Primary (Brand)': '#202024',
+      'Primary Foreground': '#fcfcfc',
+    }}
+  />
+  <ColorItem
+    title="theme.color.secondary"
+    subtitle="Secondary & Accent States"
+    colors={{
+      'Secondary Hover': '#f4f4f5',
+      'Muted Foreground': '#71717a',
+    }}
+  />
+  <ColorItem
+    title="theme.color.feedback"
+    subtitle="Contextual Feedback States"
+    colors={{
+      Success: '#22c55e',
+      Warning: '#eab308',
+      Error: '#ef4444',
+      Info: '#3b82f6',
+    }}
+  />
+  <ColorItem
+    title="theme.color.surfaces"
+    subtitle="Surfaces, Borders & Copy"
+    colors={{
+      Background: '#fcfcfc',
+      Surface: '#ffffff',
+      Border: '#e4e4e7',
+      Text: '#18181b',
+    }}
+  />
+</ColorPalette>
