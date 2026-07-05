@@ -31,7 +31,7 @@ export function NoteCard({ note, viewMode, onDelete, onEdit }: NoteCardProps) {
             <button
               {...triggerProps}
               type="button"
-              className="inline-flex items-center justify-center size-6 rounded-md hover:bg-secondary text-muted-foreground hover:text-foreground cursor-pointer transition-opacity opacity-0 group-hover:opacity-100"
+              className="inline-flex items-center justify-center size-6 rounded-md hover:bg-secondary text-muted-foreground hover:text-foreground cursor-pointer"
               aria-label="Note actions"
             >
               <MoreHorizontal className="size-3.5" />
