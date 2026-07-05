@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1783234270353" clover="3.2.0">
-  <project timestamp="1783234270353" name="All files">
-    <metrics statements="243" coveredstatements="219" conditionals="145" coveredconditionals="103" methods="108" coveredmethods="97" elements="496" coveredelements="419" complexity="0" loc="243" ncloc="243" packages="3" files="17" classes="17"/>
+<coverage generated="1783235231036" clover="3.2.0">
+  <project timestamp="1783235231036" name="All files">
+    <metrics statements="254" coveredstatements="230" conditionals="159" coveredconditionals="115" methods="112" coveredmethods="101" elements="525" coveredelements="446" complexity="0" loc="254" ncloc="254" packages="4" files="19" classes="19"/>
     <package name="components.presentational.notes">
       <metrics statements="97" coveredstatements="85" conditionals="99" coveredconditionals="70" methods="48" coveredmethods="42"/>
       <file name="CreateNoteDrawer.tsx" path="/Users/sagarpansare/Documents/notes-app/frontend/src/components/presentational/notes/CreateNoteDrawer.tsx">
@@ -120,6 +120,26 @@
         <line num="191" count="0" type="stmt"/>
       </file>
       <file name="index.ts" path="/Users/sagarpansare/Documents/notes-app/frontend/src/components/presentational/notes/index.ts">
+        <metrics statements="0" coveredstatements="0" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+      </file>
+    </package>
+    <package name="components.presentational.tags">
+      <metrics statements="11" coveredstatements="11" conditionals="14" coveredconditionals="12" methods="4" coveredmethods="4"/>
+      <file name="TagsGrid.tsx" path="/Users/sagarpansare/Documents/notes-app/frontend/src/components/presentational/tags/TagsGrid.tsx">
+        <metrics statements="11" coveredstatements="11" conditionals="14" coveredconditionals="12" methods="4" coveredmethods="4"/>
+        <line num="1" count="2" type="stmt"/>
+        <line num="26" count="8" type="cond" truecount="2" falsecount="0"/>
+        <line num="27" count="2" type="stmt"/>
+        <line num="30" count="16" type="stmt"/>
+        <line num="42" count="6" type="cond" truecount="2" falsecount="0"/>
+        <line num="43" count="2" type="stmt"/>
+        <line num="50" count="4" type="cond" truecount="4" falsecount="0"/>
+        <line num="51" count="2" type="stmt"/>
+        <line num="62" count="2" type="stmt"/>
+        <line num="65" count="6" type="stmt"/>
+        <line num="69" count="2" type="stmt"/>
+      </file>
+      <file name="index.ts" path="/Users/sagarpansare/Documents/notes-app/frontend/src/components/presentational/tags/index.ts">
         <metrics statements="0" coveredstatements="0" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
       </file>
     </package>
