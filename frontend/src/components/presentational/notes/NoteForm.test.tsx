@@ -120,4 +120,47 @@ describe('NoteForm', () => {
     expect(screen.queryByText('work')).not.toBeInTheDocument()
     expect(screen.getByText('personal')).toBeInTheDocument()
   })
+
+  it('renders available tags autocomplete options and filters out active tags', async () => {
+    const onSubmit = vi.fn()
+    const availableTags = ['ideas', 'shopping', 'work']
+    const initialValues = { title: '', content: '', tags: ['work'] }
+
+    render(
+      <NoteForm
+        onSubmit={onSubmit}
+        availableTags={availableTags}
+        initialValues={initialValues}
+      />
+    )
+
+    const tagsInput = screen.getByLabelText(/Tags/i)
+
+    // Suggestion list should not render until focused and has text input
+    expect(screen.queryByTestId('tags-suggestions-list')).not.toBeInTheDocument()
+
+    // Focus input and type 'i'
+    fireEvent.focus(tagsInput)
+    fireEvent.change(tagsInput, { target: { value: 'i' } })
+
+    // Verify popover is visible
+    expect(screen.getByTestId('tags-suggestions-list')).toBeInTheDocument()
+
+    // Should list 'ideas' and 'shopping' (contains 'i' and not 'work')
+    const options = screen.getAllByRole('listitem')
+    expect(options).toHaveLength(2)
+
+    expect(screen.getByText('ideas')).toBeInTheDocument()
+    expect(screen.getByText('shopping')).toBeInTheDocument()
+    expect(screen.queryByTestId('tag-suggestion-work')).not.toBeInTheDocument() // 'work' is already active
+
+    // Select 'ideas' option
+    fireEvent.click(screen.getByText('ideas'))
+
+    // Verify 'ideas' is now added to active tags
+    await waitFor(() => {
+      expect(screen.getByText('ideas')).toBeInTheDocument()
+      expect(tagsInput).toHaveValue('')
+    })
+  })
 })

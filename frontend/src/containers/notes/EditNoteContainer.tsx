@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react'
 import { useUpdateNote } from '@/hooks/use-update-note'
+import { useTags } from '@/hooks/use-tags'
 import { EditNoteDrawer } from '@/components/presentational/notes'
 import type { Note } from '@/types/note'
 
@@ -11,6 +12,7 @@ interface EditNoteContainerProps {
 
 export function EditNoteContainer({ note, open, onOpenChange }: EditNoteContainerProps) {
   const [autoSaveStatus, setAutoSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
+  const { data: tags } = useTags()
   const updateMutation = useUpdateNote()
 
   const handleAutoSave = useCallback(
@@ -49,6 +51,8 @@ export function EditNoteContainer({ note, open, onOpenChange }: EditNoteContaine
     [note, updateMutation, onOpenChange]
   )
 
+  const availableTags = tags?.map((t) => t.name) ?? []
+
   return (
     <EditNoteDrawer
       open={open}
@@ -57,6 +61,7 @@ export function EditNoteContainer({ note, open, onOpenChange }: EditNoteContaine
       onSubmit={handleSave}
       onAutoSave={handleAutoSave}
       autoSaveStatus={autoSaveStatus}
+      availableTags={availableTags}
     />
   )
 }

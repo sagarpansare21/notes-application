@@ -18,6 +18,7 @@ interface NoteFormProps {
   // Called on every change when in edit mode — for auto-save
   onAutoSave?: (data: { title: string; content: string; tags: string[] }) => void
   autoSaveStatus?: 'idle' | 'saving' | 'saved' | 'error'
+  availableTags?: string[]
 }
 
 export function NoteForm({
@@ -30,8 +31,11 @@ export function NoteForm({
   initialValues,
   onAutoSave,
   autoSaveStatus = 'idle',
+  availableTags = [],
 }: NoteFormProps) {
   const [tagInput, setTagInput] = useState('')
+  const [isFocused, setIsFocused] = useState(false)
+  const [highlightedIndex, setHighlightedIndex] = useState(0)
 
   const {
     register,
@@ -67,7 +71,6 @@ export function NoteForm({
     }
   }, [initialValues?.title, initialValues?.content, initialValues?.tags, reset, mode]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Auto-save: watch all fields and call onAutoSave after a change
   const watchedValues = watch()
   const onAutoSaveRef = React.useRef(onAutoSave)
   useEffect(() => { onAutoSaveRef.current = onAutoSave })
@@ -146,6 +149,13 @@ export function NoteForm({
         control={control}
         render={({ field, fieldState: { error, isTouched } }) => {
           const tagsInputId = 'note-form-tags-input'
+          const suggestions = availableTags.filter(
+            (tag) =>
+              tag.toLowerCase().includes(tagInput.toLowerCase()) &&
+              !field.value.includes(tag)
+          )
+          const showSuggestions = isFocused && tagInput.trim() !== '' && suggestions.length > 0
+
           return (
             <div className="flex flex-col gap-1.5 w-full">
               <label
@@ -154,36 +164,98 @@ export function NoteForm({
               >
                 Tags (Press Enter to add)
               </label>
-              <div
-                className={cn(
-                  'flex flex-wrap items-center gap-1.5 min-h-[38px] w-full rounded-md border border-border bg-background px-3 py-1.5 text-xs transition-all duration-150 focus-within:border-ring',
-                  error && 'border-destructive focus-within:border-destructive'
-                )}
-              >
-                {field.value.map((tag) => (
-                  <span
-                    key={tag}
-                    className="inline-flex items-center gap-1 bg-secondary text-secondary-foreground text-[10px] px-2 py-0.5 rounded-full select-none"
-                  >
-                    <span className="truncate">{tag}</span>
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveTag(tag, field.value, field.onChange)}
-                      className="hover:text-destructive font-semibold cursor-pointer px-0.5 text-[9px]"
+              <div className="relative w-full">
+                <div
+                  className={cn(
+                    'flex flex-wrap items-center gap-1.5 min-h-[38px] w-full rounded-md border border-border bg-background px-3 py-1.5 text-xs transition-all duration-150 focus-within:border-ring',
+                    error && 'border-destructive focus-within:border-destructive'
+                  )}
+                >
+                  {field.value.map((tag) => (
+                    <span
+                      key={tag}
+                      className="inline-flex items-center gap-1 bg-secondary text-secondary-foreground text-[10px] px-2 py-0.5 rounded-full select-none"
                     >
-                      ×
-                    </button>
-                  </span>
-                ))}
-                <input
-                  id={tagsInputId}
-                  type="text"
-                  value={tagInput}
-                  onChange={(e) => setTagInput(e.target.value)}
-                  onKeyDown={(e) => handleAddTag(e, field.value, field.onChange)}
-                  placeholder={field.value.length === 0 ? 'Add tags...' : ''}
-                  className="flex-1 bg-transparent py-0.5 focus:outline-none placeholder:text-muted-foreground/60 text-foreground"
-                />
+                      <span className="truncate">{tag}</span>
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveTag(tag, field.value, field.onChange)}
+                        className="hover:text-destructive font-semibold cursor-pointer px-0.5 text-[9px]"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  ))}
+                  <input
+                    id={tagsInputId}
+                    type="text"
+                    autoComplete="off"
+                    value={tagInput}
+                    onFocus={() => {
+                      setIsFocused(true)
+                      setHighlightedIndex(0)
+                    }}
+                    onBlur={() => {
+                      // Slight delay to allow suggestions click selection to commit first
+                      setTimeout(() => setIsFocused(false), 200)
+                    }}
+                    onChange={(e) => {
+                      setTagInput(e.target.value)
+                      setHighlightedIndex(0)
+                    }}
+                    onKeyDown={(e) => {
+                      if (showSuggestions) {
+                        if (e.key === 'ArrowDown') {
+                          e.preventDefault()
+                          setHighlightedIndex((prev) => (prev + 1) % suggestions.length)
+                        } else if (e.key === 'ArrowUp') {
+                          e.preventDefault()
+                          setHighlightedIndex((prev) => (prev - 1 + suggestions.length) % suggestions.length)
+                        } else if (e.key === 'Enter') {
+                          e.preventDefault()
+                          const selectedTag = suggestions[highlightedIndex]
+                          if (selectedTag) {
+                            field.onChange([...field.value, selectedTag])
+                            setTagInput('')
+                          } else {
+                            handleAddTag(e, field.value, field.onChange)
+                          }
+                        } else if (e.key === 'Escape') {
+                          setIsFocused(false)
+                        }
+                      } else {
+                        handleAddTag(e, field.value, field.onChange)
+                      }
+                    }}
+                    placeholder={field.value.length === 0 ? 'Add tags...' : ''}
+                    className="flex-1 bg-transparent py-0.5 focus:outline-none placeholder:text-muted-foreground/60 text-foreground"
+                  />
+                </div>
+
+                {/* Autocomplete Suggestions Popover */}
+                {showSuggestions && (
+                  <ul
+                    className="absolute left-0 right-0 z-50 mt-1 max-h-48 overflow-y-auto rounded-lg border border-border bg-popover p-1 shadow-lg w-full animate-in fade-in slide-in-from-top-1 duration-100"
+                    data-testid="tags-suggestions-list"
+                  >
+                    {suggestions.map((tag, idx) => (
+                      <li
+                        key={tag}
+                        onClick={() => {
+                          field.onChange([...field.value, tag])
+                          setTagInput('')
+                        }}
+                        className={cn(
+                          'relative flex w-full cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-xs text-popover-foreground outline-none transition-colors hover:bg-accent hover:text-accent-foreground',
+                          idx === highlightedIndex && 'bg-accent text-accent-foreground font-semibold'
+                        )}
+                        data-testid={`tag-suggestion-${tag}`}
+                      >
+                        {tag}
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
               {isTouched && error && (
                 <p className="text-xs text-destructive font-medium leading-none">

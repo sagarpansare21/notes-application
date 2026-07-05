@@ -15,6 +15,7 @@ interface EditNoteDrawerProps {
   onSubmit: (data: { title: string; content: string; tags: string[] }) => void
   onAutoSave: (data: { title: string; content: string; tags: string[] }) => void
   autoSaveStatus?: 'idle' | 'saving' | 'saved' | 'error'
+  availableTags?: string[]
 }
 
 export function EditNoteDrawer({
@@ -24,6 +25,7 @@ export function EditNoteDrawer({
   onSubmit,
   onAutoSave,
   autoSaveStatus = 'idle',
+  availableTags = [],
 }: EditNoteDrawerProps) {
   if (!note) return null
 
@@ -50,6 +52,7 @@ export function EditNoteDrawer({
             onCancel={() => onOpenChange(false)}
             onAutoSave={onAutoSave}
             autoSaveStatus={autoSaveStatus}
+            availableTags={availableTags}
           />
         </div>
       </DrawerContent>

@@ -13,9 +13,16 @@ interface CreateNoteDrawerProps {
   onOpenChange: (open: boolean) => void
   onSubmit: (noteData: { title: string; content: string; tags: string[] }) => void
   isLoading?: boolean
+  availableTags?: string[]
 }
 
-export function CreateNoteDrawer({ open, onOpenChange, onSubmit, isLoading = false }: CreateNoteDrawerProps) {
+export function CreateNoteDrawer({
+  open,
+  onOpenChange,
+  onSubmit,
+  isLoading = false,
+  availableTags = [],
+}: CreateNoteDrawerProps) {
   const [isDirty, setIsDirty] = useState(false)
 
   const handleOpenChange = (newOpen: boolean) => {
@@ -46,6 +53,7 @@ export function CreateNoteDrawer({ open, onOpenChange, onSubmit, isLoading = fal
             isLoading={isLoading}
             onDirtyChange={setIsDirty}
             open={open}
+            availableTags={availableTags}
           />
         </div>
       </DrawerContent>
