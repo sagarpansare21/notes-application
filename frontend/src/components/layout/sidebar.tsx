@@ -1,6 +1,5 @@
 import { useLocation, Link } from 'react-router'
 import {
-  LayoutDashboard,
   FileText,
   Tag,
   Trash2,

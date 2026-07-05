@@ -5,7 +5,7 @@ import { ExportImportPanel } from '@/components/presentational/export-import'
 
 export function ExportImportContainer() {
   const [isDragActive, setIsDragActive] = useState(false)
-  const [importProgress, setImportProgress] = useState(0)
+  const [importProgress] = useState(0)
   const [importError, setImportError] = useState<string | null>(null)
   const [importSuccess, setImportSuccess] = useState(false)
   const [importedStats, setImportedStats] = useState<{ imported: number; skipped: number; failed: number } | null>(null)
@@ -26,22 +26,6 @@ export function ExportImportContainer() {
     setIsDragActive(false)
   }
 
-  const simulateProgress = (callback: () => void) => {
-    setImportProgress(0)
-    let current = 0
-    const interval = setInterval(() => {
-      current += 15
-      if (current >= 90) {
-        clearInterval(interval)
-        setImportProgress(90)
-        callback()
-      } else {
-        setImportProgress(current)
-      }
-    }, 100)
-    return interval
-  }
-
   const processFile = (file: File) => {
     if (file.type !== 'application/json' && !file.name.endsWith('.json')) {
       setImportError('Invalid file type. Only JSON files are accepted.')
@@ -53,21 +37,6 @@ export function ExportImportContainer() {
     setImportError(null)
     setImportSuccess(false)
     setImportedStats(null)
-
-    const interval = simulateProgress(() => {
-      importNotesMutation.mutate(file, {
-        onSuccess: (data) => {
-          setImportProgress(100)
-          setImportSuccess(true)
-          setImportedStats(data)
-        },
-        onError: (err: any) => {
-          setImportProgress(0)
-          const msg = err.response?.data?.message || 'Failed to import notes. Make sure the JSON format matches note records schema.'
-          setImportError(msg)
-        },
-      })
-    })
   }
 
   const handleDrop = (e: React.DragEvent) => {

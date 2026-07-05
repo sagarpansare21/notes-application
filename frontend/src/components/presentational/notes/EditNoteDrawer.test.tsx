@@ -1,4 +1,3 @@
-import React from 'react'
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react'
 import '@testing-library/jest-dom'
@@ -50,7 +49,7 @@ describe('EditNoteDrawer', () => {
 
     expect(screen.getByRole('heading', { name: 'Edit Note' })).toBeInTheDocument()
     expect(screen.getByText(/Changes are saved automatically as you type/i)).toBeInTheDocument()
-    
+
     const titleInput = screen.getByLabelText(/Title/i)
     expect(titleInput).toHaveValue('Initial Title')
 
@@ -101,7 +100,7 @@ describe('EditNoteDrawer', () => {
     fireEvent.change(titleInput, { target: { value: 'Updated Title' } })
 
     const saveBtn = screen.getByRole('button', { name: /Save Changes/i })
-    
+
     await waitFor(() => {
       expect(saveBtn).not.toBeDisabled()
     })

@@ -1,6 +1,6 @@
 import React from 'react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { renderHook, act, waitFor } from '@testing-library/react'
+import { renderHook, act } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { useSyncQueue } from './use-sync-queue'
 import { useSyncStore } from './use-sync-store'
@@ -108,12 +108,12 @@ describe('useSyncQueue', () => {
 
     vi.mocked(getAllSyncEntries).mockResolvedValue(mockEntries)
     vi.mocked(getSyncQueueCount).mockResolvedValue(0)
-    
+
     // Mocks for processing
     const createdNote = { id: 'real-1', title: 'New', content: 'New content', tags: [], createdAt: '', updatedAt: '' }
     vi.mocked(createNote).mockResolvedValue(createdNote)
     vi.mocked(getLocalNote).mockResolvedValue({ id: 'optimistic-1', title: 'New', content: 'New content', tags: [], createdAt: '', updatedAt: '' })
-    
+
     const updatedNote = { id: 'note-2', title: 'Title 2', content: 'Updated content', tags: [], createdAt: '', updatedAt: '' }
     vi.mocked(updateNote).mockResolvedValue(updatedNote)
 
@@ -146,7 +146,7 @@ describe('useSyncQueue', () => {
     expect(useSyncStore.getState().pendingCount).toBe(0)
     expect(useSyncStore.getState().lastSyncAt).toBeInstanceOf(Date)
     expect(toast.success).toHaveBeenCalledWith('All changes synced successfully')
-    
+
     expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['notes'] })
     expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['tags'] })
   })

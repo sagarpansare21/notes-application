@@ -1,4 +1,3 @@
-import React from 'react'
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import '@testing-library/jest-dom'
@@ -92,7 +91,6 @@ describe('TrashGrid', () => {
     expect(screen.getByText('Deleted B')).toBeInTheDocument()
     expect(screen.getByText('2 notes found in trash')).toBeInTheDocument()
 
-    // Trigger Empty Trash dialogue confirmation flow
     const emptyBtn = screen.getByRole('button', { name: /Empty Trash/i })
     fireEvent.click(emptyBtn)
 

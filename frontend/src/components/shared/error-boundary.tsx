@@ -1,4 +1,4 @@
-import React, { Component, useState, type ErrorInfo, type ReactNode } from 'react'
+import { Component, useState, type ErrorInfo, type ReactNode } from 'react'
 import { AlertCircle, RefreshCcw, Copy, Check, RefreshCw, Terminal } from 'lucide-react'
 
 interface ErrorBoundaryProps {
@@ -99,7 +99,7 @@ function ErrorDisplay({ error, onReset }: ErrorDisplayProps) {
             <RefreshCcw className="size-4" />
             Try again
           </button>
-          
+
           <button
             onClick={handleHardReload}
             className="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-5 py-2.5 rounded-xl border border-border bg-background text-sm font-semibold text-foreground hover:bg-accent active:scale-98 transition-all cursor-pointer"

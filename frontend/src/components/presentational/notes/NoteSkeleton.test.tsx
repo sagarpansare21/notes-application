@@ -1,12 +1,11 @@
 import { describe, it, expect } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render } from '@testing-library/react'
 import '@testing-library/jest-dom'
 import { NoteSkeleton } from './NoteSkeleton'
 
 describe('NoteSkeleton', () => {
   it('renders a grid skeleton by default', () => {
     const { container } = render(<NoteSkeleton />)
-    // Grid skeleton has animate-pulse class and a min-height card
     const card = container.firstChild as HTMLElement
     expect(card).toHaveClass('animate-pulse')
   })
@@ -15,7 +14,6 @@ describe('NoteSkeleton', () => {
     const { container } = render(<NoteSkeleton viewMode="grid" />)
     const card = container.firstChild as HTMLElement
     expect(card).toHaveClass('animate-pulse')
-    // Grid mode has min-h-[140px]
     expect(card.className).toContain('min-h-[140px]')
   })
 
@@ -23,7 +21,6 @@ describe('NoteSkeleton', () => {
     const { container } = render(<NoteSkeleton viewMode="list" />)
     const card = container.firstChild as HTMLElement
     expect(card).toHaveClass('animate-pulse')
-    // List mode uses flex-row layout
     expect(card.className).toContain('items-center')
   })
 
@@ -34,7 +31,6 @@ describe('NoteSkeleton', () => {
     const gridCard = gridContainer.firstChild as HTMLElement
     const listCard = listContainer.firstChild as HTMLElement
 
-    // They should have different class names since they are different layouts
     expect(gridCard.className).not.toEqual(listCard.className)
   })
 })
