@@ -76,4 +76,64 @@ describe('NotesToolbar', () => {
 
     expect(defaultProps.onAddNoteClick).toHaveBeenCalled()
   })
+
+  it('does not render Add Note button when onAddNoteClick is not provided', () => {
+    const { onAddNoteClick: _omitted, ...propsWithoutAdd } = defaultProps
+    render(<NotesToolbar {...propsWithoutAdd} />)
+
+    expect(screen.queryByRole('button', { name: /Add Note/i })).not.toBeInTheDocument()
+  })
+
+  it('triggers onViewModeChange with "grid" when grid button is clicked', () => {
+    render(<NotesToolbar {...defaultProps} viewMode="list" />)
+
+    const gridBtn = screen.getByTitle('Grid View')
+    fireEvent.click(gridBtn)
+
+    expect(defaultProps.onViewModeChange).toHaveBeenCalledWith('grid')
+  })
+
+  it('opens export dropdown and calls onExport with json', () => {
+    render(<NotesToolbar {...defaultProps} />)
+
+    const exportBtn = screen.getByRole('button', { name: /Export/i })
+    fireEvent.click(exportBtn)
+
+    const jsonItem = screen.getByText(/Export as JSON/i)
+    fireEvent.click(jsonItem)
+
+    expect(defaultProps.onExport).toHaveBeenCalledWith('json')
+  })
+
+  it('opens export dropdown and calls onExport with markdown', () => {
+    render(<NotesToolbar {...defaultProps} />)
+
+    const exportBtn = screen.getByRole('button', { name: /Export/i })
+    fireEvent.click(exportBtn)
+
+    const mdItem = screen.getByText(/Export as Markdown/i)
+    fireEvent.click(mdItem)
+
+    expect(defaultProps.onExport).toHaveBeenCalledWith('markdown')
+  })
+
+  it('toggles sort order from asc to desc', () => {
+    render(<NotesToolbar {...defaultProps} sortOrder="asc" />)
+
+    const toggleButton = screen.getByTitle('Sort Ascending')
+    fireEvent.click(toggleButton)
+
+    expect(defaultProps.onSortOrderChange).toHaveBeenCalledWith('desc')
+  })
+
+  it('syncs localSearch state when external search prop changes', async () => {
+    const { rerender } = render(<NotesToolbar {...defaultProps} search="" />)
+
+    rerender(<NotesToolbar {...defaultProps} search="updated" />)
+
+    await waitFor(() => {
+      const searchInput = screen.getByPlaceholderText(/Search notes.../i)
+      expect(searchInput).toHaveValue('updated')
+    })
+  })
 })

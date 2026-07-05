@@ -163,4 +163,86 @@ describe('NoteForm', () => {
       expect(tagsInput).toHaveValue('')
     })
   })
+
+  it('navigates suggestions with ArrowDown and selects on Enter', async () => {
+    const onSubmit = vi.fn()
+    const availableTags = ['alpha', 'beta', 'gamma']
+
+    render(<NoteForm onSubmit={onSubmit} availableTags={availableTags} />)
+
+    const tagsInput = screen.getByLabelText(/Tags/i)
+    fireEvent.focus(tagsInput)
+    fireEvent.change(tagsInput, { target: { value: 'a' } })
+
+    // suggestions should be visible now
+    await waitFor(() => {
+      expect(screen.getByTestId('tags-suggestions-list')).toBeInTheDocument()
+    })
+
+    // ArrowDown highlights next item
+    fireEvent.keyDown(tagsInput, { key: 'ArrowDown' })
+
+    // Enter selects the highlighted suggestion
+    fireEvent.keyDown(tagsInput, { key: 'Enter' })
+
+    // Tag input should be cleared after selection
+    await waitFor(() => {
+      expect(tagsInput).toHaveValue('')
+    })
+  })
+
+  it('navigates suggestions with ArrowUp', async () => {
+    const onSubmit = vi.fn()
+    const availableTags = ['alpha', 'beta', 'gamma']
+
+    render(<NoteForm onSubmit={onSubmit} availableTags={availableTags} />)
+
+    const tagsInput = screen.getByLabelText(/Tags/i)
+    fireEvent.focus(tagsInput)
+    fireEvent.change(tagsInput, { target: { value: 'a' } })
+
+    await waitFor(() => {
+      expect(screen.getByTestId('tags-suggestions-list')).toBeInTheDocument()
+    })
+
+    // ArrowUp wraps around
+    fireEvent.keyDown(tagsInput, { key: 'ArrowUp' })
+
+    // Suggestions should still be visible
+    expect(screen.getByTestId('tags-suggestions-list')).toBeInTheDocument()
+  })
+
+  it('closes suggestion list on Escape key', async () => {
+    const onSubmit = vi.fn()
+    const availableTags = ['alpha', 'beta']
+
+    render(<NoteForm onSubmit={onSubmit} availableTags={availableTags} />)
+
+    const tagsInput = screen.getByLabelText(/Tags/i)
+    fireEvent.focus(tagsInput)
+    fireEvent.change(tagsInput, { target: { value: 'a' } })
+
+    await waitFor(() => {
+      expect(screen.getByTestId('tags-suggestions-list')).toBeInTheDocument()
+    })
+
+    fireEvent.keyDown(tagsInput, { key: 'Escape' })
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('tags-suggestions-list')).not.toBeInTheDocument()
+    })
+  })
+
+  it('adds tag by typing and pressing Enter when no suggestion is highlighted', async () => {
+    const onSubmit = vi.fn()
+
+    render(<NoteForm onSubmit={onSubmit} />)
+
+    const tagsInput = screen.getByLabelText(/Tags/i)
+    fireEvent.change(tagsInput, { target: { value: 'mytag' } })
+    fireEvent.keyDown(tagsInput, { key: 'Enter' })
+
+    expect(screen.getByText('mytag')).toBeInTheDocument()
+    expect(tagsInput).toHaveValue('')
+  })
 })

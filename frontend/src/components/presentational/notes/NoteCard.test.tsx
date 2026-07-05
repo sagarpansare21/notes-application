@@ -87,4 +87,65 @@ describe('NoteCard', () => {
     fireEvent.keyDown(card, { key: 'Backspace', code: 'Backspace' })
     expect(onDelete).toHaveBeenCalledWith('1')
   })
+
+  it('calls onEdit when card body is clicked in list mode', () => {
+    const onDelete = vi.fn()
+    const onEdit = vi.fn()
+    render(<NoteCard note={mockNote} viewMode="list" onDelete={onDelete} onEdit={onEdit} />)
+
+    const card = screen.getByRole('button', { name: `Edit note: ${mockNote.title}` })
+    fireEvent.click(card)
+
+    expect(onEdit).toHaveBeenCalledWith(mockNote)
+    expect(onDelete).not.toHaveBeenCalled()
+  })
+
+  it('triggers onEdit on keyboard nav in list mode (Enter/Space) and onDelete on Delete/Backspace', () => {
+    const onDelete = vi.fn()
+    const onEdit = vi.fn()
+    render(<NoteCard note={mockNote} viewMode="list" onDelete={onDelete} onEdit={onEdit} />)
+
+    const card = screen.getByRole('button', { name: `Edit note: ${mockNote.title}` })
+
+    fireEvent.keyDown(card, { key: 'Enter' })
+    expect(onEdit).toHaveBeenCalledTimes(1)
+
+    fireEvent.keyDown(card, { key: ' ' })
+    expect(onEdit).toHaveBeenCalledTimes(2)
+
+    fireEvent.keyDown(card, { key: 'Delete' })
+    expect(onDelete).toHaveBeenCalledWith('1')
+
+    fireEvent.keyDown(card, { key: 'Backspace' })
+    expect(onDelete).toHaveBeenCalledTimes(2)
+  })
+
+  it('calls onEdit when card body is clicked in grid mode', () => {
+    const onDelete = vi.fn()
+    const onEdit = vi.fn()
+    render(<NoteCard note={mockNote} viewMode="grid" onDelete={onDelete} onEdit={onEdit} />)
+
+    const card = screen.getByRole('button', { name: `Edit note: ${mockNote.title}` })
+    fireEvent.click(card)
+
+    expect(onEdit).toHaveBeenCalledWith(mockNote)
+  })
+
+  it('shows "No content" placeholder when note has no content', () => {
+    const onDelete = vi.fn()
+    const onEdit = vi.fn()
+    const emptyNote = { ...mockNote, content: '' }
+    render(<NoteCard note={emptyNote} viewMode="grid" onDelete={onDelete} onEdit={onEdit} />)
+
+    expect(screen.getByText('No content')).toBeInTheDocument()
+  })
+
+  it('renders notes correctly when there are no tags', () => {
+    const onDelete = vi.fn()
+    const onEdit = vi.fn()
+    const noteNoTags = { ...mockNote, tags: [] }
+    render(<NoteCard note={noteNoTags} viewMode="grid" onDelete={onDelete} onEdit={onEdit} />)
+
+    expect(screen.queryByText(/#/)).not.toBeInTheDocument()
+  })
 })

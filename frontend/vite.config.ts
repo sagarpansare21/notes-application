@@ -60,6 +60,7 @@ export default defineConfig({
         '**/*.svg',
         '**/*.ico',
         'src/components/ui/**/*',
+        'src/components/shared/**/*',
         'src/components/layout/**/*',
         'src/containers/**/*',
         'src/lib/**/*',
