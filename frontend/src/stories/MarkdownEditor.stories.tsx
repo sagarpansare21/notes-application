@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { MarkdownEditor } from '../components/ui/markdown-editor'
+import { MarkdownEditor } from '../components/shared/markdown-editor'
 
 const meta: Meta<typeof MarkdownEditor> = {
   title: 'Components/UI/MarkdownEditor',

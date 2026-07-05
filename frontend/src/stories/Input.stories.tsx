@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { Input } from '../components/ui/input'
+import { Input } from '../components/ui/shadcn/input'
 import { expect, userEvent, within } from 'storybook/test'
 
 const meta: Meta<typeof Input> = {

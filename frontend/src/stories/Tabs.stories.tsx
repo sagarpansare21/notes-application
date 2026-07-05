@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '../components/ui/tabs'
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '../components/ui/shadcn/tabs'
 
 /**
  * ### Purpose

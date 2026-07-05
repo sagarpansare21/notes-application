@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { LoadingSpinner } from '../components/ui/loading-spinner'
+import { LoadingSpinner } from '../components/shared/loading-spinner'
 
 /**
  * ### Purpose

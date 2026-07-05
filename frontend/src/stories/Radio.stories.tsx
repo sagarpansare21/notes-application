@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { RadioGroup, RadioGroupItem } from '../components/ui/radio'
+import { RadioGroup, RadioGroupItem } from '../components/ui/shadcn/radio'
 
 /**
  * ### Purpose

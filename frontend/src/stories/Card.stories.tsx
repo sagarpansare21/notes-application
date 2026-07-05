@@ -6,7 +6,7 @@ import {
   CardDescription,
   CardContent,
   CardFooter
-} from '../components/ui/card'
+} from '../components/ui/shadcn/card'
 
 const meta: Meta<typeof Card> = {
   title: 'Components/UI/Card',

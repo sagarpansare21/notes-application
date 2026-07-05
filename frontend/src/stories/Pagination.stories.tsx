@@ -1,6 +1,6 @@
 import * as React from 'react'
 import type { Meta, StoryObj } from '@storybook/react'
-import { Pagination } from '../components/ui/pagination'
+import { Pagination } from '../components/shared/pagination'
 
 /**
  * ### Purpose

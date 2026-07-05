@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { toast } from '../components/ui/toast'
-import { Button } from '../components/ui/button'
+import { toast } from '../components/ui/shadcn/toast'
+import { Button } from '../components/ui/shadcn/button'
 import { Toaster } from 'sonner'
 
 /**

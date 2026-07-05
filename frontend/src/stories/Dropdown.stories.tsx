@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '../components/ui/dropdown'
-import { Button } from '../components/ui/button'
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '../components/ui/shadcn/dropdown'
+import { Button } from '../components/ui/shadcn/button'
 import { Settings, FileText, Trash2 } from 'lucide-react'
 
 /**

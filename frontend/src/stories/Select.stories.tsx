@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '../components/ui/select'
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '../components/ui/shadcn/select'
 
 /**
  * ### Purpose

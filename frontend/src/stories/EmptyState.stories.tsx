@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { EmptyState } from '../components/ui/empty-state'
-import { Button } from '../components/ui/button'
+import { EmptyState } from '../components/shared/empty-state'
+import { Button } from '../components/ui/shadcn/button'
 import { FileText, Tag, Trash2, Search, Plus } from 'lucide-react'
 
 const meta: Meta<typeof EmptyState> = {

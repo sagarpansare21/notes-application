@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from '../components/ui/tooltip'
-import { Button } from '../components/ui/button'
+import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from '../components/ui/shadcn/tooltip'
+import { Button } from '../components/ui/shadcn/button'
 import { HelpCircle } from 'lucide-react'
 
 /**
