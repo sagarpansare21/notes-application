@@ -28,6 +28,7 @@ export function NoteCard({ note, viewMode, onDelete, onEdit }: NoteCardProps) {
             {...triggerProps}
             type="button"
             className="inline-flex items-center justify-center size-6 rounded-md hover:bg-secondary text-muted-foreground hover:text-foreground cursor-pointer transition-opacity opacity-0 group-hover:opacity-100"
+            aria-label="Note actions"
           >
             <MoreHorizontal className="size-3.5" />
           </button>
@@ -56,7 +57,24 @@ export function NoteCard({ note, viewMode, onDelete, onEdit }: NoteCardProps) {
     return (
       <Card
         hoverable
-        className="flex items-center justify-between gap-4 p-3 border border-border bg-card hover:border-ring/30 select-none cursor-default group"
+        tabIndex={0}
+        role="button"
+        aria-label={`Edit note: ${note.title}`}
+        onClick={(e) => {
+          const target = e.target as HTMLElement
+          if (target.closest('[aria-label="Note actions"]')) return
+          onEdit(note)
+        }}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault()
+            onEdit(note)
+          } else if (e.key === 'Delete' || e.key === 'Backspace') {
+            e.preventDefault()
+            onDelete(note.id)
+          }
+        }}
+        className="flex items-center justify-between gap-4 p-3 border border-border bg-card hover:border-ring/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring select-none cursor-pointer group"
       >
         <div className="flex flex-1 items-center min-w-0 gap-3">
           <h3 className="font-semibold text-xs text-foreground tracking-tight truncate w-1/4 shrink-0">
@@ -92,7 +110,24 @@ export function NoteCard({ note, viewMode, onDelete, onEdit }: NoteCardProps) {
   return (
     <Card
       hoverable
-      className="flex flex-col justify-between p-4.5 border border-border bg-card hover:border-ring/30 select-none cursor-default min-h-[140px] gap-3 text-left relative group"
+      tabIndex={0}
+      role="button"
+      aria-label={`Edit note: ${note.title}`}
+      onClick={(e) => {
+        const target = e.target as HTMLElement
+        if (target.closest('[aria-label="Note actions"]')) return
+        onEdit(note)
+      }}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault()
+          onEdit(note)
+        } else if (e.key === 'Delete' || e.key === 'Backspace') {
+          e.preventDefault()
+          onDelete(note.id)
+        }
+      }}
+      className="flex flex-col justify-between p-4.5 border border-border bg-card hover:border-ring/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring select-none cursor-pointer min-h-[140px] gap-3 text-left relative group"
     >
       <div className="flex flex-col gap-1.5 min-w-0">
         <div className="flex items-start justify-between gap-2">

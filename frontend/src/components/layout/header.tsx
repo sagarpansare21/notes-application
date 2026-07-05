@@ -1,6 +1,8 @@
+import { useState } from 'react'
 import { useLocation } from 'react-router'
-import { Menu, PanelLeft, Search, Sun, Moon } from 'lucide-react'
+import { Menu, PanelLeft, Search, Sun, Moon, Keyboard } from 'lucide-react'
 import { Button } from '../ui/button'
+import { KeyboardShortcutsDialog } from './keyboard-shortcuts-dialog'
 
 interface HeaderProps {
   sidebarCollapsed: boolean
@@ -19,6 +21,7 @@ export function Header({
 }: HeaderProps) {
   const location = useLocation()
   const pathname = location.pathname
+  const [shortcutsOpen, setShortcutsOpen] = useState(false)
 
   const getTabLabel = () => {
     switch (pathname) {
@@ -70,6 +73,7 @@ export function Header({
       <div className="relative w-full max-w-[280px] sm:max-w-[360px] mx-4 hidden xs:block">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground" />
         <input
+          id="header-search-input"
           type="text"
           placeholder="Search workspaces or notes..."
           className="w-full bg-secondary/35 dark:bg-muted/20 border border-border/70 rounded-lg pl-9 pr-8 py-1.5 text-xs text-foreground placeholder:text-muted-foreground/70 hover:border-muted-foreground/20 focus:bg-background focus:border-ring focus:ring-3 focus:ring-ring/25 focus:outline-none transition-all duration-150"
@@ -84,12 +88,24 @@ export function Header({
           variant="ghost"
           size="icon-xs"
           className="size-8 text-muted-foreground hover:text-foreground"
+          onClick={() => setShortcutsOpen(true)}
+          aria-label="Show keyboard shortcuts"
+        >
+          <Keyboard className="size-4" />
+        </Button>
+
+        <Button
+          variant="ghost"
+          size="icon-xs"
+          className="size-8 text-muted-foreground hover:text-foreground"
           onClick={onToggleDarkMode}
           aria-label="Toggle theme"
         >
           {darkMode ? <Sun className="size-4 text-yellow-500" /> : <Moon className="size-4" />}
         </Button>
       </div>
+
+      <KeyboardShortcutsDialog open={shortcutsOpen} onOpenChange={setShortcutsOpen} />
     </header>
   )
 }

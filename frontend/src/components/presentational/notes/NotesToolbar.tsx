@@ -72,8 +72,10 @@ export function NotesToolbar({
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="w-full sm:w-72 md:w-80">
           <Input
+            id="notes-search-input"
             placeholder="Search notes..."
             value={localSearch}
+            autoComplete='off'
             onChange={(e) => setLocalSearch(e.target.value)}
             leftIcon={<Search className="size-4 opacity-60" />}
             className="h-8 py-1.5"
@@ -146,8 +148,8 @@ export function NotesToolbar({
               onClick={() => onViewModeChange('grid')}
               title="Grid View"
               className={`inline-flex items-center justify-center size-7 rounded-sm cursor-pointer transition-all duration-150 ${viewMode === 'grid'
-                  ? 'bg-card text-foreground shadow-sm border border-border/40'
-                  : 'text-muted-foreground hover:text-foreground'
+                ? 'bg-card text-foreground shadow-sm border border-border/40'
+                : 'text-muted-foreground hover:text-foreground'
                 }`}
             >
               <Grid className="size-3.5" />
@@ -157,8 +159,8 @@ export function NotesToolbar({
               onClick={() => onViewModeChange('list')}
               title="List View"
               className={`inline-flex items-center justify-center size-7 rounded-sm cursor-pointer transition-all duration-150 ${viewMode === 'list'
-                  ? 'bg-card text-foreground shadow-sm border border-border/40'
-                  : 'text-muted-foreground hover:text-foreground'
+                ? 'bg-card text-foreground shadow-sm border border-border/40'
+                : 'text-muted-foreground hover:text-foreground'
                 }`}
             >
               <List className="size-3.5" />

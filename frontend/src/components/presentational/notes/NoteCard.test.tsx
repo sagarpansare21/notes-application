@@ -39,8 +39,8 @@ describe('NoteCard', () => {
     const onEdit = vi.fn()
     render(<NoteCard note={mockNote} viewMode="grid" onDelete={onDelete} onEdit={onEdit} />)
 
-    const menuButtons = screen.getAllByRole('button')
-    fireEvent.click(menuButtons[0])
+    const actionBtn = screen.getByRole('button', { name: 'Note actions' })
+    fireEvent.click(actionBtn)
 
     const deleteItem = screen.getByText(/Delete/i)
     expect(deleteItem).toBeInTheDocument()
@@ -54,13 +54,37 @@ describe('NoteCard', () => {
     const onEdit = vi.fn()
     render(<NoteCard note={mockNote} viewMode="grid" onDelete={onDelete} onEdit={onEdit} />)
 
-    const menuButtons = screen.getAllByRole('button')
-    fireEvent.click(menuButtons[0])
+    const actionBtn = screen.getByRole('button', { name: 'Note actions' })
+    fireEvent.click(actionBtn)
 
     const editItem = screen.getByText(/Edit/i)
     expect(editItem).toBeInTheDocument()
     fireEvent.click(editItem)
 
     expect(onEdit).toHaveBeenCalledWith(mockNote)
+  })
+
+  it('triggers onEdit on Enter and Space, and onDelete on Delete and Backspace keys', () => {
+    const onDelete = vi.fn()
+    const onEdit = vi.fn()
+    render(<NoteCard note={mockNote} viewMode="grid" onDelete={onDelete} onEdit={onEdit} />)
+
+    const card = screen.getByRole('button', { name: `Edit note: ${mockNote.title}` })
+
+    // Enter key press triggers onEdit
+    fireEvent.keyDown(card, { key: 'Enter', code: 'Enter' })
+    expect(onEdit).toHaveBeenCalledWith(mockNote)
+
+    // Space key press triggers onEdit
+    fireEvent.keyDown(card, { key: ' ', code: 'Space' })
+    expect(onEdit).toHaveBeenCalledWith(mockNote)
+
+    // Delete key press triggers onDelete
+    fireEvent.keyDown(card, { key: 'Delete', code: 'Delete' })
+    expect(onDelete).toHaveBeenCalledWith('1')
+
+    // Backspace key press triggers onDelete
+    fireEvent.keyDown(card, { key: 'Backspace', code: 'Backspace' })
+    expect(onDelete).toHaveBeenCalledWith('1')
   })
 })

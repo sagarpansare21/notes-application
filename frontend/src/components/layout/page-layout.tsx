@@ -8,8 +8,11 @@ import { PageSkeleton } from '@/components/ui/page-skeleton'
 import { cn } from '@/lib/utils'
 import { useUIStore } from '@/hooks/use-ui-store'
 import { useOfflineStatus } from '@/hooks/use-offline-status'
+import { useKeyboardShortcuts } from '@/hooks/use-keyboard-shortcuts'
 
 export function PageLayout() {
+  useKeyboardShortcuts()
+
   const sidebarCollapsed = useUIStore((state) => state.sidebarCollapsed)
   const setSidebarCollapsed = useUIStore((state) => state.setSidebarCollapsed)
   const mobileOpen = useUIStore((state) => state.mobileOpen)
