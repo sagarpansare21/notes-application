@@ -11,16 +11,16 @@ export function OfflineBanner({ className }: OfflineBannerProps) {
       role="status"
       aria-live="polite"
       className={cn(
-        'flex items-center justify-center gap-2 w-full px-4 py-2',
+        'flex items-center justify-between gap-3 w-full px-4 py-2',
         'bg-amber-500/10 border-b border-amber-500/20 text-amber-700 dark:text-amber-400',
         'text-xs font-medium animate-in slide-in-from-top duration-300',
         className
       )}
     >
-      <WifiOff className="size-3.5 shrink-0" />
-      <span>
-        You&apos;re offline. Changes will sync when you reconnect.
-      </span>
+      <div className="flex items-center gap-2">
+        <WifiOff className="size-3.5 shrink-0" />
+        <span>You&apos;re offline. Changes are saved locally and will sync when you reconnect.</span>
+      </div>
     </div>
   )
 }

@@ -17,11 +17,10 @@ export function PageLayout() {
   const setSidebarCollapsed = useUIStore((state) => state.setSidebarCollapsed)
   const mobileOpen = useUIStore((state) => state.mobileOpen)
   const setMobileOpen = useUIStore((state) => state.setMobileOpen)
-  const openCreateNote = useUIStore((state) => state.openCreateNote)
   const darkMode = useUIStore((state) => state.darkMode)
   const toggleDarkMode = useUIStore((state) => state.toggleDarkMode)
 
-  const isOffline = useOfflineStatus()
+  const isOffline = useOfflineStatus();
 
   useEffect(() => {
     if (darkMode) {
@@ -64,8 +63,10 @@ export function PageLayout() {
       </aside>
 
       <div className="flex flex-col flex-1 min-w-0">
-        {/* Offline banner sits between header and main */}
-        {isOffline && <OfflineBanner />}
+        {/* Offline banner sits above the header */}
+        {isOffline && (
+          <OfflineBanner />
+        )}
 
         <Header
           sidebarCollapsed={sidebarCollapsed}

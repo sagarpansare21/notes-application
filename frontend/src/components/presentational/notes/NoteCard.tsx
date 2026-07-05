@@ -21,37 +21,43 @@ export function NoteCard({ note, viewMode, onDelete, onEdit }: NoteCardProps) {
   const relativeTime = formatRelativeTime(note.updatedAt)
 
   const menu = (
-    <DropdownMenu>
-      <DropdownMenuTrigger
-        render={(triggerProps) => (
-          <button
-            {...triggerProps}
-            type="button"
-            className="inline-flex items-center justify-center size-6 rounded-md hover:bg-secondary text-muted-foreground hover:text-foreground cursor-pointer transition-opacity opacity-0 group-hover:opacity-100"
-            aria-label="Note actions"
+    // React portal events bubble through the React fiber tree (not the DOM tree).
+    // Wrapping here stops ALL clicks within the menu — including portal item clicks — from
+    // reaching the card's onClick handler.
+    <div onClick={(e) => e.stopPropagation()}>
+      <DropdownMenu>
+        <DropdownMenuTrigger
+          render={(triggerProps) => (
+            <button
+              {...triggerProps}
+              type="button"
+              className="inline-flex items-center justify-center size-6 rounded-md hover:bg-secondary text-muted-foreground hover:text-foreground cursor-pointer transition-opacity opacity-0 group-hover:opacity-100"
+              aria-label="Note actions"
+            >
+              <MoreHorizontal className="size-3.5" />
+            </button>
+          )}
+        />
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem
+            onClick={() => onEdit(note)}
+            className="gap-1.5 cursor-pointer"
           >
-            <MoreHorizontal className="size-3.5" />
-          </button>
-        )}
-      />
-      <DropdownMenuContent align="end">
-        <DropdownMenuItem
-          onClick={() => onEdit(note)}
-          className="gap-1.5 cursor-pointer"
-        >
-          <Pencil className="size-3.5" />
-          Edit
-        </DropdownMenuItem>
-        <DropdownMenuItem
-          onClick={() => onDelete(note.id)}
-          className="text-destructive focus:bg-destructive/10 focus:text-destructive gap-1.5 cursor-pointer"
-        >
-          <Trash className="size-3.5" />
-          Delete
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+            <Pencil className="size-3.5" />
+            Edit
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onClick={() => onDelete(note.id)}
+            className="text-destructive focus:bg-destructive/10 focus:text-destructive gap-1.5 cursor-pointer"
+          >
+            <Trash className="size-3.5" />
+            Delete
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
   )
+
 
   if (viewMode === 'list') {
     return (
@@ -60,11 +66,7 @@ export function NoteCard({ note, viewMode, onDelete, onEdit }: NoteCardProps) {
         tabIndex={0}
         role="button"
         aria-label={`Edit note: ${note.title}`}
-        onClick={(e) => {
-          const target = e.target as HTMLElement
-          if (target.closest('[aria-label="Note actions"]')) return
-          onEdit(note)
-        }}
+        onClick={() => onEdit(note)}
         onKeyDown={(e) => {
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault()

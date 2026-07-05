@@ -2,12 +2,35 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { createNote } from '@/services/note-api'
 import type { Note, CreateNoteInput, PaginatedNotes } from '@/types/note'
 import { toast } from '@/components/ui/shadcn/toast'
+import { upsertLocalNote, enqueueSync, generateSyncId } from '@/lib/local-db'
 
 export function useCreateNote(options?: { onSuccess?: () => void }) {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (input: CreateNoteInput) => createNote(input),
+    mutationFn: async (input: CreateNoteInput) => {
+      if (!navigator.onLine) {
+        const tempId = `optimistic-${Date.now()}`
+        const tempNote: Note = {
+          id: tempId,
+          title: input.title,
+          content: input.content,
+          tags: input.tags || [],
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        }
+        await upsertLocalNote(tempNote)
+        await enqueueSync({
+          id: generateSyncId(),
+          type: 'create',
+          payload: input,
+          tempId,
+          createdAt: Date.now(),
+        })
+        return tempNote
+      }
+      return createNote(input)
+    },
     onMutate: async (newNoteInput) => {
       await queryClient.cancelQueries({ queryKey: ['notes'] })
 
@@ -33,8 +56,13 @@ export function useCreateNote(options?: { onSuccess?: () => void }) {
 
       return { previousNotesQueries }
     },
-    onSuccess: () => {
-      toast.success('Note created successfully')
+    onSuccess: (note) => {
+      upsertLocalNote(note)
+      if (navigator.onLine) {
+        toast.success('Note created successfully')
+      } else {
+        toast.info('Note saved locally. Will sync when back online.')
+      }
       options?.onSuccess?.()
     },
     onError: (error: unknown, _variables, context) => {
@@ -49,9 +77,11 @@ export function useCreateNote(options?: { onSuccess?: () => void }) {
       }
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['notes'] })
-      queryClient.invalidateQueries({ queryKey: ['dashboard'] })
-      queryClient.invalidateQueries({ queryKey: ['tags'] })
+      if (navigator.onLine) {
+        queryClient.invalidateQueries({ queryKey: ['notes'] })
+        queryClient.invalidateQueries({ queryKey: ['dashboard'] })
+        queryClient.invalidateQueries({ queryKey: ['tags'] })
+      }
     },
   })
 }
