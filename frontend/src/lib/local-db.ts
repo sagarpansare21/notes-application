@@ -22,6 +22,23 @@ export type SyncQueueEntry =
     noteId: string
     createdAt: number
   }
+  | {
+    id: string
+    type: 'delete-permanently'
+    noteId: string
+    createdAt: number
+  }
+  | {
+    id: string
+    type: 'restore'
+    noteId: string
+    createdAt: number
+  }
+  | {
+    id: string
+    type: 'empty-trash'
+    createdAt: number
+  }
 
 interface NotesDB extends DBSchema {
   notes: {
@@ -71,8 +88,8 @@ export async function upsertLocalNotes(notes: Note[]): Promise<void> {
 
 export async function getLocalNotes(): Promise<Note[]> {
   const db = await getDB()
-  const all = await db.getAllFromIndex('notes', 'by-updatedAt')
-  return all.reverse()
+  const all = await db.getAll('notes')
+  return all.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
 }
 
 export async function getLocalNote(id: string): Promise<Note | undefined> {

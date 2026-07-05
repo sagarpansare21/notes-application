@@ -134,4 +134,50 @@ describe('useNotes', () => {
     expect(result.current.data?.data).toEqual([mockLocalNotes[1], mockLocalNotes[2]])
     expect(result.current.data?.total).toBe(3)
   })
+
+  it('should fallback to local cache when server call throws network error (no HTTP response)', async () => {
+    Object.defineProperty(navigator, 'onLine', {
+      value: true,
+      configurable: true,
+    })
+
+    const mockLocalNotes = [
+      { id: '1', title: 'Cached Note', content: 'Cached Content', tags: [], createdAt: '', updatedAt: '' },
+    ]
+    vi.mocked(getLocalNotes).mockResolvedValue(mockLocalNotes)
+
+    // Simulate network error (no response)
+    const networkError = new Error('Network Error')
+    vi.mocked(getNotes).mockRejectedValue(networkError)
+
+    const { result } = renderHook(() => useNotes(), { wrapper })
+
+    await waitFor(() => {
+      expect(result.current.isSuccess).toBe(true)
+    })
+
+    expect(result.current.data?.data).toEqual(mockLocalNotes)
+    expect(result.current.data?.total).toBe(1)
+  })
+
+  it('should rethrow error when server responds with an HTTP error code', async () => {
+    Object.defineProperty(navigator, 'onLine', {
+      value: true,
+      configurable: true,
+    })
+
+    // Simulate Axios/HTTP error (with response)
+    const httpError: any = new Error('Request failed with status code 500')
+    httpError.response = { status: 500, data: {} }
+    httpError.isAxiosError = true
+    vi.mocked(getNotes).mockRejectedValue(httpError)
+
+    const { result } = renderHook(() => useNotes(), { wrapper })
+
+    await waitFor(() => {
+      expect(result.current.isError).toBe(true)
+    })
+
+    expect(result.current.error).toBe(httpError)
+  })
 })

@@ -37,6 +37,17 @@ export function ExportImportContainer() {
     setImportError(null)
     setImportSuccess(false)
     setImportedStats(null)
+
+    importNotesMutation.mutate(file, {
+      onSuccess: (data) => {
+        setImportSuccess(true)
+        setImportedStats(data)
+      },
+      onError: (err: any) => {
+        const msg = err.response?.data?.message || 'Failed to import notes. Make sure the JSON format matches note records schema.'
+        setImportError(msg)
+      },
+    })
   }
 
   const handleDrop = (e: React.DragEvent) => {

@@ -6,9 +6,17 @@ import {
   getLocalNote,
   upsertLocalNote,
   deleteLocalNote,
+  getLocalNotes,
 } from '@/lib/local-db'
 import type { SyncQueueEntry } from '@/lib/local-db'
-import { createNote, updateNote, deleteNote } from '@/services/note-api'
+import {
+  createNote,
+  updateNote,
+  deleteNote,
+  deleteNotePermanently,
+  restoreNote,
+  emptyTrash,
+} from '@/services/note-api'
 import { useQueryClient } from '@tanstack/react-query'
 import { toast } from '@/components/ui/shadcn/toast'
 import { useSyncStore } from './use-sync-store'
@@ -29,7 +37,35 @@ async function processSyncEntry(entry: SyncQueueEntry): Promise<void> {
     }
     case 'delete': {
       await deleteNote(entry.noteId)
+      const note = await getLocalNote(entry.noteId)
+      if (note) {
+        note.deletedAt = new Date().toISOString()
+        await upsertLocalNote(note)
+      }
+      break
+    }
+    case 'delete-permanently': {
+      await deleteNotePermanently(entry.noteId)
       await deleteLocalNote(entry.noteId)
+      break
+    }
+    case 'restore': {
+      await restoreNote(entry.noteId)
+      const note = await getLocalNote(entry.noteId)
+      if (note) {
+        note.deletedAt = null
+        await upsertLocalNote(note)
+      }
+      break
+    }
+    case 'empty-trash': {
+      await emptyTrash()
+      const localNotes = await getLocalNotes()
+      for (const note of localNotes) {
+        if (note.deletedAt) {
+          await deleteLocalNote(note.id)
+        }
+      }
       break
     }
   }

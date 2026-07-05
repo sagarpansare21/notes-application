@@ -19,6 +19,9 @@ vi.mock('@/services/note-api', () => ({
   createNote: vi.fn(),
   updateNote: vi.fn(),
   deleteNote: vi.fn(),
+  deleteNotePermanently: vi.fn(),
+  restoreNote: vi.fn(),
+  emptyTrash: vi.fn(),
 }))
 
 vi.mock('@/lib/local-db', () => ({
@@ -26,8 +29,9 @@ vi.mock('@/lib/local-db', () => ({
   getAllSyncEntries: vi.fn(),
   dequeueSyncEntry: vi.fn(),
   getLocalNote: vi.fn(),
-  upsertLocalNote: vi.fn(),
-  deleteLocalNote: vi.fn(),
+  upsertLocalNote: vi.fn().mockResolvedValue(undefined),
+  deleteLocalNote: vi.fn().mockResolvedValue(undefined),
+  getLocalNotes: vi.fn(),
 }))
 
 vi.mock('@/components/ui/shadcn/toast', () => ({
@@ -112,7 +116,15 @@ describe('useSyncQueue', () => {
     // Mocks for processing
     const createdNote = { id: 'real-1', title: 'New', content: 'New content', tags: [], createdAt: '', updatedAt: '' }
     vi.mocked(createNote).mockResolvedValue(createdNote)
-    vi.mocked(getLocalNote).mockResolvedValue({ id: 'optimistic-1', title: 'New', content: 'New content', tags: [], createdAt: '', updatedAt: '' })
+    vi.mocked(getLocalNote).mockImplementation(async (id) => {
+      if (id === 'optimistic-1') {
+        return { id: 'optimistic-1', title: 'New', content: 'New content', tags: [], createdAt: '', updatedAt: '' }
+      }
+      if (id === 'note-3') {
+        return { id: 'note-3', title: 'Deleted', content: 'Deleted content', tags: [], createdAt: '', updatedAt: '' }
+      }
+      return undefined
+    })
 
     const updatedNote = { id: 'note-2', title: 'Title 2', content: 'Updated content', tags: [], createdAt: '', updatedAt: '' }
     vi.mocked(updateNote).mockResolvedValue(updatedNote)
@@ -134,7 +146,7 @@ describe('useSyncQueue', () => {
     expect(deleteLocalNote).toHaveBeenCalledWith('optimistic-1')
     expect(upsertLocalNote).toHaveBeenCalledWith(createdNote)
     expect(upsertLocalNote).toHaveBeenCalledWith(updatedNote)
-    expect(deleteLocalNote).toHaveBeenCalledWith('note-3')
+    expect(upsertLocalNote).toHaveBeenCalledWith(expect.objectContaining({ id: 'note-3', deletedAt: expect.any(String) }))
 
     // Dequeues
     expect(dequeueSyncEntry).toHaveBeenCalledWith('sync-1')

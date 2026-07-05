@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { deleteNote } from '@/services/note-api'
 import { toast } from '@/components/ui/shadcn/toast'
-import { deleteLocalNote, enqueueSync, generateSyncId } from '@/lib/local-db'
+import { getLocalNote, upsertLocalNote, enqueueSync, generateSyncId } from '@/lib/local-db'
 import type { PaginatedNotes } from '@/types/note'
 
 export function useDeleteNote() {
@@ -10,7 +10,11 @@ export function useDeleteNote() {
   return useMutation({
     mutationFn: async (id: string) => {
       if (!navigator.onLine) {
-        await deleteLocalNote(id)
+        const note = await getLocalNote(id)
+        if (note) {
+          note.deletedAt = new Date().toISOString()
+          await upsertLocalNote(note)
+        }
         await enqueueSync({
           id: generateSyncId(),
           type: 'delete',
@@ -37,14 +41,22 @@ export function useDeleteNote() {
 
       return { previousNotesQueries }
     },
-    onSuccess: () => {
+    onSuccess: (_, id) => {
+      // Soft delete: update deletedAt in localDb
+      getLocalNote(id).then((note) => {
+        if (note) {
+          note.deletedAt = new Date().toISOString()
+          upsertLocalNote(note).catch(console.error)
+        }
+      }).catch(console.error)
+
       if (navigator.onLine) {
         queryClient.invalidateQueries({ queryKey: ['notes'] })
         queryClient.invalidateQueries({ queryKey: ['dashboard'] })
         queryClient.invalidateQueries({ queryKey: ['tags'] })
         toast.success('Note moved to trash')
       } else {
-        toast.info('Note removed locally. Will sync when back online.')
+        toast.info('Note moved to trash locally. Will sync when back online.')
       }
     },
     onError: (error: unknown, _id, context) => {
