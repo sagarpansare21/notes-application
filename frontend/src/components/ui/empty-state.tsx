@@ -11,7 +11,7 @@ interface EmptyStateProps extends React.HTMLAttributes<HTMLDivElement> {
 
 export function EmptyState({
   className,
-  icon = <FileText className="size-8 text-muted-foreground/60" />,
+  icon = <FileText className="size-7 text-muted-foreground/50" />,
   title,
   description,
   action,
@@ -20,19 +20,33 @@ export function EmptyState({
   return (
     <div
       className={cn(
-        'flex flex-col items-center justify-center text-center p-8 md:p-12 border border-dashed border-border bg-card/30 rounded-xl max-w-md mx-auto w-full shadow-notion',
+        'flex flex-col items-center justify-center text-center p-10',
+        'border border-dashed border-border/60 bg-muted/10',
+        'rounded-2xl max-w-sm mx-auto w-full',
         className
       )}
       {...props}
     >
-      <div className="flex items-center justify-center size-14 rounded-full bg-secondary dark:bg-muted mb-4 shrink-0 shadow-sm border border-border/50 [&_svg]:shrink-0">
+      {/* Icon circle */}
+      <div className="flex items-center justify-center size-16 rounded-2xl bg-secondary/60 dark:bg-muted/50 border border-border/40 mb-5 shadow-sm [&_svg]:shrink-0">
         {icon}
       </div>
-      <h3 className="text-base font-semibold text-foreground tracking-tight mb-1">{title}</h3>
+
+      <h3 className="text-sm font-semibold text-foreground tracking-tight mb-1.5">
+        {title}
+      </h3>
+
       {description && (
-        <p className="text-sm text-muted-foreground max-w-xs mb-5 leading-normal">{description}</p>
+        <p className="text-xs text-muted-foreground max-w-[220px] mb-5 leading-relaxed">
+          {description}
+        </p>
       )}
-      {action && <div className="flex items-center gap-2">{action}</div>}
+
+      {action && (
+        <div className="flex items-center gap-2 mt-1">
+          {action}
+        </div>
+      )}
     </div>
   )
 }

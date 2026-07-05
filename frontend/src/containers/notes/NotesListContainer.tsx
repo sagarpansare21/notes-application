@@ -2,6 +2,7 @@ import { Plus, X } from 'lucide-react'
 import { useNotes } from '@/hooks/use-notes'
 import { useDeleteNote } from '@/hooks/use-delete-note'
 import { useUIStore } from '@/hooks/use-ui-store'
+import { useOfflineStatus } from '@/hooks/use-offline-status'
 import { Button } from '@/components/ui/button'
 import { EmptyState } from '@/components/ui/empty-state'
 import { ErrorState } from '@/components/ui/error-state'
@@ -13,11 +14,13 @@ import type { UseNotesFiltersReturn } from '@/hooks/useNotesFilters'
 
 interface NotesListContainerProps {
   filters: UseNotesFiltersReturn
+  onEdit: (note: Note) => void
 }
 
-export function NotesListContainer({ filters }: NotesListContainerProps) {
+export function NotesListContainer({ filters, onEdit }: NotesListContainerProps) {
   const openCreateNote = useUIStore((state) => state.openCreateNote)
   const deleteMutation = useDeleteNote()
+  const isOffline = useOfflineStatus()
 
   const offset = (filters.page - 1) * filters.limit
 
@@ -59,9 +62,14 @@ export function NotesListContainer({ filters }: NotesListContainerProps) {
     return (
       <div className="flex items-center justify-center min-h-[300px]">
         <ErrorState
-          title="Failed to fetch notes"
-          message="There was an error communicating with the backend notes service."
-          onRetry={refetch}
+          variant={isOffline ? 'offline' : 'error'}
+          title={isOffline ? "You're offline" : 'Failed to fetch notes'}
+          message={
+            isOffline
+              ? 'Connect to the internet to load and sync your notes.'
+              : 'There was an error communicating with the backend notes service.'
+          }
+          onRetry={isOffline ? undefined : refetch}
         />
       </div>
     )
@@ -121,6 +129,7 @@ export function NotesListContainer({ filters }: NotesListContainerProps) {
             note={note}
             viewMode={filters.viewMode}
             onDelete={(id) => deleteMutation.mutate(id)}
+            onEdit={onEdit}
           />
         ))}
       </div>

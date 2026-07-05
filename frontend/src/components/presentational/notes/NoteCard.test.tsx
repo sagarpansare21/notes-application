@@ -16,7 +16,8 @@ describe('NoteCard', () => {
 
   it('renders note fields correctly in grid mode', () => {
     const onDelete = vi.fn()
-    render(<NoteCard note={mockNote} viewMode="grid" onDelete={onDelete} />)
+    const onEdit = vi.fn()
+    render(<NoteCard note={mockNote} viewMode="grid" onDelete={onDelete} onEdit={onEdit} />)
 
     expect(screen.getByText('Test Note Title')).toBeInTheDocument()
     expect(screen.getByText(/Heading This is a simple markdown content/i)).toBeInTheDocument()
@@ -26,7 +27,8 @@ describe('NoteCard', () => {
 
   it('renders note fields correctly in list mode', () => {
     const onDelete = vi.fn()
-    render(<NoteCard note={mockNote} viewMode="list" onDelete={onDelete} />)
+    const onEdit = vi.fn()
+    render(<NoteCard note={mockNote} viewMode="list" onDelete={onDelete} onEdit={onEdit} />)
 
     expect(screen.getByText('Test Note Title')).toBeInTheDocument()
     expect(screen.getByText(/Heading This is a simple markdown content/i)).toBeInTheDocument()
@@ -34,7 +36,8 @@ describe('NoteCard', () => {
 
   it('calls onDelete callback when delete menu item is clicked', async () => {
     const onDelete = vi.fn()
-    render(<NoteCard note={mockNote} viewMode="grid" onDelete={onDelete} />)
+    const onEdit = vi.fn()
+    render(<NoteCard note={mockNote} viewMode="grid" onDelete={onDelete} onEdit={onEdit} />)
 
     const menuButtons = screen.getAllByRole('button')
     fireEvent.click(menuButtons[0])
@@ -44,5 +47,20 @@ describe('NoteCard', () => {
     fireEvent.click(deleteItem)
 
     expect(onDelete).toHaveBeenCalledWith('1')
+  })
+
+  it('calls onEdit callback when edit menu item is clicked', async () => {
+    const onDelete = vi.fn()
+    const onEdit = vi.fn()
+    render(<NoteCard note={mockNote} viewMode="grid" onDelete={onDelete} onEdit={onEdit} />)
+
+    const menuButtons = screen.getAllByRole('button')
+    fireEvent.click(menuButtons[0])
+
+    const editItem = screen.getByText(/Edit/i)
+    expect(editItem).toBeInTheDocument()
+    fireEvent.click(editItem)
+
+    expect(onEdit).toHaveBeenCalledWith(mockNote)
   })
 })

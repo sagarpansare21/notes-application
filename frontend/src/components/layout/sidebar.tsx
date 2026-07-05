@@ -20,8 +20,7 @@ export function Sidebar({ onCollapse, onMobileClose }: SidebarProps) {
   const pathname = location.pathname
 
   const navItems = [
-    { id: 'dashboard', label: 'Dashboard', path: '/', icon: LayoutDashboard },
-    { id: 'notes', label: 'Notes', path: '/notes', icon: FileText },
+    { id: 'notes', label: 'Notes', path: '/', icon: FileText },
     { id: 'tags', label: 'Tags', path: '/tags', icon: Tag },
     { id: 'trash', label: 'Trash', path: '/trash', icon: Trash2 },
     { id: 'export-import', label: 'Export/Import', path: '/export-import', icon: Database }

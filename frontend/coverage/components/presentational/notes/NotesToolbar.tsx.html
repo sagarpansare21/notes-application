@@ -23,9 +23,9 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">65.51% </span>
+                <span class="strong">68.75% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>19/29</span>
+                <span class='fraction'>22/32</span>
             </div>
         
             
@@ -37,16 +37,16 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">70.58% </span>
+                <span class="strong">72.22% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>12/17</span>
+                <span class='fraction'>13/18</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">66.66% </span>
+                <span class="strong">70.37% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>16/24</span>
+                <span class='fraction'>19/27</span>
             </div>
         
             
@@ -273,7 +273,10 @@
 <a name='L208'></a><a href='#L208'>208</a>
 <a name='L209'></a><a href='#L209'>209</a>
 <a name='L210'></a><a href='#L210'>210</a>
-<a name='L211'></a><a href='#L211'>211</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
+<a name='L211'></a><a href='#L211'>211</a>
+<a name='L212'></a><a href='#L212'>212</a>
+<a name='L213'></a><a href='#L213'>213</a>
+<a name='L214'></a><a href='#L214'>214</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -325,6 +328,11 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">7x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">7x</span>
+<span class="cline-any cline-yes">7x</span>
+<span class="cline-any cline-yes">6x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">7x</span>
 <span class="cline-any cline-yes">6x</span>
@@ -424,9 +432,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -483,7 +489,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import { useState, useEffect } from 'react'
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import { useState, useEffect, useRef } from 'react'
 import { Search, Grid, List, ArrowUp, ArrowDown, Download, Filter } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -536,12 +542,17 @@ export function NotesToolbar({
 }: NotesToolbarProps) {
   const [localSearch, setLocalSearch] = useState(search)
 &nbsp;
+  const onSearchChangeRef = useRef(onSearchChange)
+  useEffect(() =&gt; {
+    onSearchChangeRef.current = onSearchChange
+  })
+&nbsp;
   useEffect(() =&gt; {
     const timer = setTimeout(() =&gt; {
-      onSearchChange(localSearch)
+      onSearchChangeRef.current(localSearch)
     }, 350)
     return () =&gt; clearTimeout(timer)
-  }, [localSearch, onSearchChange])
+  }, [localSearch])
 &nbsp;
   useEffect(() =&gt; {
     setLocalSearch(search)
@@ -625,11 +636,10 @@ export function NotesToolbar({
               type="button"
 <span class="fstat-no" title="function not covered" >              onClick={() =&gt; <span class="cstat-no" title="statement not covered" >o</span>nViewModeChange('grid')}</span>
               title="Grid View"
-              className={`inline-flex items-center justify-center size-7 rounded-sm cursor-pointer transition-all duration-150 ${
-                viewMode === 'grid'
+              className={`inline-flex items-center justify-center size-7 rounded-sm cursor-pointer transition-all duration-150 ${viewMode === 'grid'
                   ? 'bg-card text-foreground shadow-sm border border-border/40'
                   : <span class="branch-1 cbranch-no" title="branch not covered" >'text-muted-foreground hover:text-foreground'</span>
-              }`}
+                }`}
             &gt;
               &lt;Grid className="size-3.5" /&gt;
             &lt;/button&gt;
@@ -637,11 +647,10 @@ export function NotesToolbar({
               type="button"
               onClick={() =&gt; onViewModeChange('list')}
               title="List View"
-              className={`inline-flex items-center justify-center size-7 rounded-sm cursor-pointer transition-all duration-150 ${
-                viewMode === 'list'
+              className={`inline-flex items-center justify-center size-7 rounded-sm cursor-pointer transition-all duration-150 ${viewMode === 'list'
                   ? <span class="branch-0 cbranch-no" title="branch not covered" >'bg-card text-foreground shadow-sm border border-border/40'</span>
                   : 'text-muted-foreground hover:text-foreground'
-              }`}
+                }`}
             &gt;
               &lt;List className="size-3.5" /&gt;
             &lt;/button&gt;
@@ -700,7 +709,7 @@ export function NotesToolbar({
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-07-05T04:46:01.443Z
+                at 2026-07-05T06:37:22.907Z
             </div>
         <script src="../../../prettify.js"></script>
         <script>

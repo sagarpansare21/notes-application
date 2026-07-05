@@ -40,6 +40,11 @@ export async function createNote(input: CreateNoteInput): Promise<Note> {
   return response.data.data
 }
 
+export async function updateNote(id: string, input: Partial<CreateNoteInput>): Promise<Note> {
+  const response = await api.patch<{ success: boolean; message: string; data: Note }>(`/v1/notes/${id}`, input)
+  return response.data.data
+}
+
 export async function deleteNote(id: string): Promise<void> {
   await api.delete(`/v1/notes/${id}`)
 }

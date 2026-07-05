@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { createNoteSchema, type CreateNoteFormValues } from '@/lib/validation/note'
@@ -9,13 +9,28 @@ import { MarkdownEditor } from '../../ui/markdown-editor'
 
 interface NoteFormProps {
   onSubmit: (data: { title: string; content: string; tags: string[] }) => void
-  onCancel: () => void
+  onCancel?: () => void
   isLoading?: boolean
   onDirtyChange?: (dirty: boolean) => void
   open?: boolean
+  mode?: 'create' | 'edit'
+  initialValues?: { title: string; content: string; tags: string[] }
+  // Called on every change when in edit mode — for auto-save
+  onAutoSave?: (data: { title: string; content: string; tags: string[] }) => void
+  autoSaveStatus?: 'idle' | 'saving' | 'saved' | 'error'
 }
 
-export function NoteForm({ onSubmit, onCancel, isLoading = false, onDirtyChange, open }: NoteFormProps) {
+export function NoteForm({
+  onSubmit,
+  onCancel,
+  isLoading = false,
+  onDirtyChange,
+  open,
+  mode = 'create',
+  initialValues,
+  onAutoSave,
+  autoSaveStatus = 'idle',
+}: NoteFormProps) {
   const [tagInput, setTagInput] = useState('')
 
   const {
@@ -23,11 +38,12 @@ export function NoteForm({ onSubmit, onCancel, isLoading = false, onDirtyChange,
     handleSubmit,
     control,
     reset,
+    watch,
     formState: { errors, isValid, touchedFields, isDirty, isSubmitSuccessful },
   } = useForm<CreateNoteFormValues>({
     resolver: zodResolver(createNoteSchema),
     mode: 'all',
-    defaultValues: {
+    defaultValues: initialValues ?? {
       title: '',
       content: '',
       tags: [],
@@ -38,13 +54,37 @@ export function NoteForm({ onSubmit, onCancel, isLoading = false, onDirtyChange,
     onDirtyChange?.(isDirty && !isSubmitSuccessful)
   }, [isDirty, isSubmitSuccessful, onDirtyChange])
 
+  // Reset form when create drawer closes or when edit note changes
   useEffect(() => {
-    if (!open) {
+    if (mode === 'create' && !open) {
       reset()
     }
-  }, [open, reset])
+  }, [open, reset, mode])
 
-  const handleAddTag = (
+  useEffect(() => {
+    if (mode === 'edit' && initialValues) {
+      reset(initialValues)
+    }
+  }, [initialValues?.title, initialValues?.content, initialValues?.tags, reset, mode]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Auto-save: watch all fields and call onAutoSave after a change
+  const watchedValues = watch()
+  const onAutoSaveRef = React.useRef(onAutoSave)
+  useEffect(() => { onAutoSaveRef.current = onAutoSave })
+
+  useEffect(() => {
+    if (mode !== 'edit' || !onAutoSaveRef.current) return
+    const timer = setTimeout(() => {
+      onAutoSaveRef.current?.({
+        title: watchedValues.title,
+        content: watchedValues.content,
+        tags: watchedValues.tags,
+      })
+    }, 800)
+    return () => clearTimeout(timer)
+  }, [watchedValues.title, watchedValues.content, watchedValues.tags, mode]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleAddTag = useCallback((
     e: React.KeyboardEvent<HTMLInputElement>,
     tags: string[],
     onChange: (tags: string[]) => void
@@ -57,19 +97,26 @@ export function NoteForm({ onSubmit, onCancel, isLoading = false, onDirtyChange,
       }
       setTagInput('')
     }
-  }
+  }, [tagInput])
 
-  const handleRemoveTag = (
+  const handleRemoveTag = useCallback((
     tagToRemove: string,
     tags: string[],
     onChange: (tags: string[]) => void
   ) => {
     onChange(tags.filter((t) => t !== tagToRemove))
-  }
+  }, [])
 
   const onFormSubmit = handleSubmit((data) => {
     onSubmit(data)
   })
+
+  const autoSaveLabel = {
+    idle: null,
+    saving: <span className="text-[10px] text-muted-foreground animate-pulse">Saving…</span>,
+    saved: <span className="text-[10px] text-muted-foreground">✓ Saved</span>,
+    error: <span className="text-[10px] text-destructive">⚠ Save failed</span>,
+  }[autoSaveStatus]
 
   return (
     <form onSubmit={onFormSubmit} noValidate className="flex flex-col gap-4 text-left">
@@ -148,24 +195,43 @@ export function NoteForm({ onSubmit, onCancel, isLoading = false, onDirtyChange,
         }}
       />
 
-      <div className="flex items-center justify-end gap-2 pt-4 border-t border-border mt-auto shrink-0 select-none">
-        <Button
-          type="button"
-          variant="outline"
-          onClick={onCancel}
-          size="sm"
-          disabled={isLoading}
-        >
-          Cancel
-        </Button>
-        <Button
-          type="submit"
-          size="sm"
-          disabled={!isValid}
-          loading={isLoading}
-        >
-          Create Note
-        </Button>
+      <div className="flex items-center justify-between gap-2 pt-4 border-t border-border mt-auto shrink-0 select-none">
+        {/* Auto-save status (edit mode) */}
+        <div className="min-h-[16px]">{autoSaveLabel}</div>
+
+        <div className="flex items-center gap-2">
+          {onCancel && (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onCancel}
+              size="sm"
+              disabled={isLoading}
+            >
+              Cancel
+            </Button>
+          )}
+          {mode === 'create' && (
+            <Button
+              type="submit"
+              size="sm"
+              disabled={!isValid}
+              loading={isLoading}
+            >
+              Create Note
+            </Button>
+          )}
+          {mode === 'edit' && (
+            <Button
+              type="submit"
+              size="sm"
+              disabled={!isValid}
+              loading={isLoading}
+            >
+              Save Changes
+            </Button>
+          )}
+        </div>
       </div>
     </form>
   )

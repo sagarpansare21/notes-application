@@ -13,6 +13,29 @@ const dirname = typeof __dirname !== 'undefined' ? __dirname : path.dirname(file
 // More info at: https://storybook.js.org/docs/next/writing-tests/integrations/vitest-addon
 export default defineConfig({
   plugins: [react(), tailwindcss()],
+  optimizeDeps: {
+    include: [
+      'react',
+      'react-dom',
+      'react-dom/client',
+      '@testing-library/react',
+      '@testing-library/dom',
+      '@testing-library/jest-dom',
+      '@tanstack/react-query',
+      'lucide-react',
+      'clsx',
+      'tailwind-merge',
+      'zustand',
+      'axios',
+      'marked',
+      'react-router',
+      '@base-ui/react',
+      '@hookform/resolvers',
+      'react-hook-form',
+      'sonner',
+      'zod'
+    ]
+  },
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src')

@@ -1,4 +1,4 @@
-import { MoreHorizontal, Trash, Clock } from 'lucide-react'
+import { MoreHorizontal, Trash, Clock, Pencil } from 'lucide-react'
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -13,11 +13,44 @@ interface NoteCardProps {
   note: Note
   viewMode: 'grid' | 'list'
   onDelete: (id: string) => void
+  onEdit: (note: Note) => void
 }
 
-export function NoteCard({ note, viewMode, onDelete }: NoteCardProps) {
+export function NoteCard({ note, viewMode, onDelete, onEdit }: NoteCardProps) {
   const plainTextPreview = getMarkdownPreview(note.content, viewMode === 'list' ? 80 : 120)
   const relativeTime = formatRelativeTime(note.updatedAt)
+
+  const menu = (
+    <DropdownMenu>
+      <DropdownMenuTrigger
+        render={(triggerProps) => (
+          <button
+            {...triggerProps}
+            type="button"
+            className="inline-flex items-center justify-center size-6 rounded-md hover:bg-secondary text-muted-foreground hover:text-foreground cursor-pointer transition-opacity opacity-0 group-hover:opacity-100"
+          >
+            <MoreHorizontal className="size-3.5" />
+          </button>
+        )}
+      />
+      <DropdownMenuContent align="end">
+        <DropdownMenuItem
+          onClick={() => onEdit(note)}
+          className="gap-1.5 cursor-pointer"
+        >
+          <Pencil className="size-3.5" />
+          Edit
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          onClick={() => onDelete(note.id)}
+          className="text-destructive focus:bg-destructive/10 focus:text-destructive gap-1.5 cursor-pointer"
+        >
+          <Trash className="size-3.5" />
+          Delete
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  )
 
   if (viewMode === 'list') {
     return (
@@ -50,28 +83,7 @@ export function NoteCard({ note, viewMode, onDelete }: NoteCardProps) {
             <Clock className="size-3 opacity-60" />
             {relativeTime}
           </span>
-          <DropdownMenu>
-            <DropdownMenuTrigger
-              render={(triggerProps) => (
-                <button
-                  {...triggerProps}
-                  type="button"
-                  className="inline-flex items-center justify-center size-6 rounded-md hover:bg-secondary text-muted-foreground hover:text-foreground cursor-pointer transition-opacity opacity-0 group-hover:opacity-100"
-                >
-                  <MoreHorizontal className="size-3.5" />
-                </button>
-              )}
-            />
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem
-                onClick={() => onDelete(note.id)}
-                className="text-destructive focus:bg-destructive/10 focus:text-destructive gap-1.5 cursor-pointer"
-              >
-                <Trash className="size-3.5" />
-                Delete
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          {menu}
         </div>
       </Card>
     )
@@ -87,28 +99,7 @@ export function NoteCard({ note, viewMode, onDelete }: NoteCardProps) {
           <h3 className="font-semibold text-xs text-foreground tracking-tight truncate flex-1">
             {note.title}
           </h3>
-          <DropdownMenu>
-            <DropdownMenuTrigger
-              render={(triggerProps) => (
-                <button
-                  {...triggerProps}
-                  type="button"
-                  className="inline-flex items-center justify-center size-5.5 rounded-md hover:bg-secondary text-muted-foreground hover:text-foreground cursor-pointer transition-opacity opacity-0 group-hover:opacity-100 shrink-0"
-                >
-                  <MoreHorizontal className="size-3.5" />
-                </button>
-              )}
-            />
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem
-                onClick={() => onDelete(note.id)}
-                className="text-destructive focus:bg-destructive/10 focus:text-destructive gap-1.5 cursor-pointer"
-              >
-                <Trash className="size-3.5" />
-                Delete
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <div className="shrink-0">{menu}</div>
         </div>
         <p className="text-xs text-muted-foreground/80 leading-relaxed line-clamp-3 break-words h-[54px] overflow-hidden">
           {plainTextPreview || <span className="italic opacity-60">No content</span>}

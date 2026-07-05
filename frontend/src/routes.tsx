@@ -1,24 +1,26 @@
 import { lazy } from 'react'
 import { createBrowserRouter } from 'react-router'
-import { PageLayout } from './components/ui/page-layout'
+import { PageLayout } from './components/layout/page-layout'
 
-const DashboardPage = lazy(() => import('./pages/dashboard').then((m) => ({ default: m.DashboardPage })))
 const NotesPage = lazy(() => import('./pages/notes').then((m) => ({ default: m.NotesPage })))
 const TagsPage = lazy(() => import('./pages/tags').then((m) => ({ default: m.TagsPage })))
 const TrashPage = lazy(() => import('./pages/trash').then((m) => ({ default: m.TrashPage })))
 const ExportImportPage = lazy(() => import('./pages/export-import').then((m) => ({ default: m.ExportImportPage })))
+const NotFoundPage = lazy(() => import('./pages/not-found').then((m) => ({ default: m.NotFoundPage })))
+
+import { ErrorBoundary } from './components/ui/error-boundary'
 
 export const router = createBrowserRouter([
   {
     path: '/',
-    element: <PageLayout />,
+    element: (
+      <ErrorBoundary>
+        <PageLayout />
+      </ErrorBoundary>
+    ),
     children: [
       {
         path: '',
-        element: <DashboardPage />,
-      },
-      {
-        path: 'notes',
         element: <NotesPage />,
       },
       {
@@ -32,6 +34,10 @@ export const router = createBrowserRouter([
       {
         path: 'export-import',
         element: <ExportImportPage />,
+      },
+      {
+        path: '*',
+        element: <NotFoundPage />,
       },
     ],
   },

@@ -1,9 +1,13 @@
 import { useEffect, Suspense } from 'react'
 import { Outlet } from 'react-router'
-import { Sidebar } from '../layout/sidebar'
-import { Header } from '../layout/header'
+import { Sidebar } from './sidebar'
+import { Header } from './header'
+import { OfflineBanner } from '@/components/ui/offline-banner'
+import { ErrorBoundary } from '@/components/ui/error-boundary'
+import { PageSkeleton } from '@/components/ui/page-skeleton'
 import { cn } from '@/lib/utils'
 import { useUIStore } from '@/hooks/use-ui-store'
+import { useOfflineStatus } from '@/hooks/use-offline-status'
 
 export function PageLayout() {
   const sidebarCollapsed = useUIStore((state) => state.sidebarCollapsed)
@@ -13,6 +17,8 @@ export function PageLayout() {
   const openCreateNote = useUIStore((state) => state.openCreateNote)
   const darkMode = useUIStore((state) => state.darkMode)
   const toggleDarkMode = useUIStore((state) => state.toggleDarkMode)
+
+  const isOffline = useOfflineStatus()
 
   useEffect(() => {
     if (darkMode) {
@@ -55,6 +61,9 @@ export function PageLayout() {
       </aside>
 
       <div className="flex flex-col flex-1 min-w-0">
+        {/* Offline banner sits between header and main */}
+        {isOffline && <OfflineBanner />}
+
         <Header
           sidebarCollapsed={sidebarCollapsed}
           onSidebarExpand={() => setSidebarCollapsed(false)}
@@ -65,9 +74,11 @@ export function PageLayout() {
         />
 
         <main className="p-4 flex-1 overflow-y-auto focus:outline-none transition-all duration-200">
-          <Suspense fallback={<div className="text-xs text-muted-foreground">Loading...</div>}>
-            <Outlet />
-          </Suspense>
+          <ErrorBoundary>
+            <Suspense fallback={<PageSkeleton />}>
+              <Outlet />
+            </Suspense>
+          </ErrorBoundary>
         </main>
       </div>
     </div>

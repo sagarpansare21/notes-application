@@ -7,7 +7,6 @@ import { createNote } from '@/services/note-api'
 import { toast } from '@/components/ui/toast'
 import type { Note } from '@/types/note'
 
-// Mock dependencies
 vi.mock('@/services/note-api', () => ({
   createNote: vi.fn(),
 }))
@@ -66,7 +65,6 @@ describe('useCreateNote', () => {
     expect(toast.success).toHaveBeenCalledWith('Note created successfully')
     expect(onSuccess).toHaveBeenCalled()
 
-    // Assert cache invalidations
     expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['notes'] })
     expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['dashboard'] })
     expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['tags'] })
