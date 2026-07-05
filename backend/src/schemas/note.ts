@@ -157,6 +157,11 @@ export const tagsResponseSchema = {
         description: "Normalized lowercased tag name",
         example: "shopping"
       },
+      noteCount: {
+        type: "integer",
+        description: "Number of active notes with this tag",
+        example: 3
+      },
     },
     required: ["id", "name"],
   },

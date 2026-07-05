@@ -1,6 +1,7 @@
 export interface Tag {
   id: string
   name: string
+  noteCount?: number
 }
 
 export interface Note {

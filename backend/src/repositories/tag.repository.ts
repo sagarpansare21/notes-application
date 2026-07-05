@@ -8,9 +8,22 @@ export class TagRepository {
       select: {
         id: true,
         name: true,
-      },
+        _count: {
+          select: {
+            notes: {
+              where: {
+                deletedAt: null
+              }
+            }
+          }
+        }
+      }
     });
-    return tags;
+    return tags.map(tag => ({
+      id: tag.id,
+      name: tag.name,
+      noteCount: tag._count.notes
+    }));
   }
 }
 

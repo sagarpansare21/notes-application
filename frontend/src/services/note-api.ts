@@ -1,5 +1,5 @@
 import { api } from '@/lib/axios'
-import type { Note, CreateNoteInput, PaginatedNotes } from '@/types/note'
+import type { Note, CreateNoteInput, PaginatedNotes, Tag } from '@/types/note'
 
 export interface GetNotesParams {
   search?: string
@@ -30,8 +30,8 @@ export async function getNotes(params?: GetNotesParams): Promise<PaginatedNotes>
   }
 }
 
-export async function getTags(): Promise<Array<{ id: string; name: string }>> {
-  const response = await api.get<{ success: boolean; message: string; data: Array<{ id: string; name: string }> }>('/v1/tags')
+export async function getTags(): Promise<Tag[]> {
+  const response = await api.get<{ success: boolean; message: string; data: Tag[] }>('/v1/tags')
   return response.data.data || []
 }
 

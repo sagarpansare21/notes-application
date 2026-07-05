@@ -96,8 +96,8 @@ export const noteRoutes: FastifyPluginAsync = async (fastify) => {
         type: "object",
         description: "Path parameters",
         properties: {
-          id: { 
-            type: "string", 
+          id: {
+            type: "string",
             description: "Unique note identifier",
             example: "cb05a418-ed17-4a17-96dc-f777084fe4eb"
           },
@@ -138,8 +138,8 @@ export const noteRoutes: FastifyPluginAsync = async (fastify) => {
         type: "object",
         description: "Path parameters",
         properties: {
-          id: { 
-            type: "string", 
+          id: {
+            type: "string",
             description: "Unique note identifier to modify",
             example: "cb05a418-ed17-4a17-96dc-f777084fe4eb"
           },
@@ -185,8 +185,8 @@ export const noteRoutes: FastifyPluginAsync = async (fastify) => {
         type: "object",
         description: "Path parameters",
         properties: {
-          id: { 
-            type: "string", 
+          id: {
+            type: "string",
             description: "Unique note identifier to delete",
             example: "cb05a418-ed17-4a17-96dc-f777084fe4eb"
           },
@@ -379,8 +379,8 @@ export const noteRoutes: FastifyPluginAsync = async (fastify) => {
         type: "object",
         description: "Path parameters",
         properties: {
-          id: { 
-            type: "string", 
+          id: {
+            type: "string",
             description: "Unique note identifier to restore",
             example: "cb05a418-ed17-4a17-96dc-f777084fe4eb"
           },
@@ -425,8 +425,8 @@ export const noteRoutes: FastifyPluginAsync = async (fastify) => {
         type: "object",
         description: "Path parameters",
         properties: {
-          id: { 
-            type: "string", 
+          id: {
+            type: "string",
             description: "Unique note identifier to delete permanently",
             example: "cb05a418-ed17-4a17-96dc-f777084fe4eb"
           },
