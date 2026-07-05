@@ -49,6 +49,19 @@ export async function deleteNote(id: string): Promise<void> {
   await api.delete(`/v1/notes/${id}`)
 }
 
+export async function getTrashNotes(): Promise<Note[]> {
+  const response = await api.get<{ success: boolean; message: string; data: Note[] }>('/v1/trash')
+  return response.data.data || []
+}
+
+export async function restoreNote(id: string): Promise<void> {
+  await api.post(`/v1/notes/${id}/restore`)
+}
+
+export async function deleteNotePermanently(id: string): Promise<void> {
+  await api.delete(`/v1/trash/${id}`)
+}
+
 export async function exportNotes(format: 'json' | 'markdown'): Promise<Blob> {
   const response = await api.get(`/v1/notes/export`, {
     params: { format },

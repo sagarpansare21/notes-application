@@ -1,0 +1,89 @@
+import React from 'react'
+import { describe, it, expect, vi } from 'vitest'
+import { render, screen, fireEvent } from '@testing-library/react'
+import '@testing-library/jest-dom'
+import { TrashGrid } from './TrashGrid'
+import type { Note } from '@/types/note'
+
+describe('TrashGrid', () => {
+  const mockNotes: Note[] = [
+    { id: '1', title: 'Deleted A', content: 'Content A', tags: [], createdAt: '', updatedAt: '' },
+    { id: '2', title: 'Deleted B', content: 'Content B', tags: [], createdAt: '', updatedAt: '' },
+  ]
+
+  it('renders loading skeleton cards when isLoading is true', () => {
+    render(
+      <TrashGrid
+        notes={undefined}
+        isLoading={true}
+        isError={false}
+        error={null}
+        onRetry={vi.fn()}
+        onRestore={vi.fn()}
+        onDeletePermanently={vi.fn()}
+      />
+    )
+
+    const skeletons = screen.getAllByTestId('trash-skeleton-card')
+    expect(skeletons).toHaveLength(4)
+  })
+
+  it('renders error state when isError is true', () => {
+    const onRetry = vi.fn()
+    const mockError = new Error('Database timeout')
+
+    render(
+      <TrashGrid
+        notes={undefined}
+        isLoading={false}
+        isError={true}
+        error={mockError}
+        onRetry={onRetry}
+        onRestore={vi.fn()}
+        onDeletePermanently={vi.fn()}
+      />
+    )
+
+    expect(screen.getByText('Database timeout')).toBeInTheDocument()
+    const retryBtn = screen.getByRole('button', { name: /Try again/i })
+    fireEvent.click(retryBtn)
+    expect(onRetry).toHaveBeenCalled()
+  })
+
+  it('renders empty state when notes array is empty', () => {
+    render(
+      <TrashGrid
+        notes={[]}
+        isLoading={false}
+        isError={false}
+        error={null}
+        onRetry={vi.fn()}
+        onRestore={vi.fn()}
+        onDeletePermanently={vi.fn()}
+      />
+    )
+
+    expect(screen.getByText('Trash is empty')).toBeInTheDocument()
+    expect(screen.getByText(/Notes you delete will appear here/i)).toBeInTheDocument()
+  })
+
+  it('renders grid of TrashCard components when notes exist', () => {
+    const onRestore = vi.fn()
+    const onDeletePermanently = vi.fn()
+
+    render(
+      <TrashGrid
+        notes={mockNotes}
+        isLoading={false}
+        isError={false}
+        error={null}
+        onRetry={vi.fn()}
+        onRestore={onRestore}
+        onDeletePermanently={onDeletePermanently}
+      />
+    )
+
+    expect(screen.getByText('Deleted A')).toBeInTheDocument()
+    expect(screen.getByText('Deleted B')).toBeInTheDocument()
+  })
+})

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { getNotes, getTags, createNote, deleteNote, exportNotes } from './note-api'
+import { getNotes, getTags, createNote, deleteNote, exportNotes, getTrashNotes, restoreNote, deleteNotePermanently } from './note-api'
 import { api } from '@/lib/axios'
 
 vi.mock('@/lib/axios', () => {
@@ -166,6 +166,41 @@ describe('note-api', () => {
       await deleteNote('123')
 
       expect(api.delete).toHaveBeenCalledWith('/v1/notes/123')
+    })
+  })
+
+  describe('getTrashNotes', () => {
+    it('calls api.get with trash endpoint and returns list of notes', async () => {
+      const mockTrash = [{ id: 'trash-1', title: 'Deleted', content: 'Gone', tags: [] }]
+      vi.mocked(api.get).mockResolvedValue({
+        data: { success: true, data: mockTrash },
+      })
+
+      const result = await getTrashNotes()
+      expect(api.get).toHaveBeenCalledWith('/v1/trash')
+      expect(result).toEqual(mockTrash)
+    })
+  })
+
+  describe('restoreNote', () => {
+    it('calls api.post to restore a note from trash', async () => {
+      vi.mocked(api.post).mockResolvedValue({
+        data: { success: true },
+      })
+
+      await restoreNote('trash-1')
+      expect(api.post).toHaveBeenCalledWith('/v1/notes/trash-1/restore')
+    })
+  })
+
+  describe('deleteNotePermanently', () => {
+    it('calls api.delete with trash endpoint and note ID', async () => {
+      vi.mocked(api.delete).mockResolvedValue({
+        data: { success: true },
+      })
+
+      await deleteNotePermanently('trash-1')
+      expect(api.delete).toHaveBeenCalledWith('/v1/trash/trash-1')
     })
   })
 
