@@ -16,7 +16,7 @@ export function CreateNoteContainer({ open, onOpenChange }: CreateNoteContainerP
   const handleCreateSubmit = async (noteData: { title: string; content: string; tags: string[] }) => {
     try {
       await createNote(noteData)
-    } catch (err) {
+    } catch {
       // Handled globally by mutation onError Toast
     }
   }

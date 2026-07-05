@@ -34,12 +34,10 @@ export function NoteForm({ onSubmit, onCancel, isLoading = false, onDirtyChange,
     },
   })
 
-  // Report dirty state to parent component, bypassing confirmation on successful submits
   useEffect(() => {
     onDirtyChange?.(isDirty && !isSubmitSuccessful)
   }, [isDirty, isSubmitSuccessful, onDirtyChange])
 
-  // Reset form inputs to blank state when drawer is closed
   useEffect(() => {
     if (!open) {
       reset()

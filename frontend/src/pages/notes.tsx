@@ -1,34 +1,29 @@
-import { CreateNoteContainer } from '@/containers/notes/CreateNoteContainer'
-import { Button } from '@/components/ui/button'
-import { EmptyState } from '@/components/ui/empty-state'
-import { Plus } from 'lucide-react'
 import { useUIStore } from '@/hooks/use-ui-store'
+import { useNotesFilters } from '@/hooks/useNotesFilters'
+import {
+  NotesToolbarContainer,
+  NotesListContainer,
+  CreateNoteContainer,
+} from '@/containers/notes'
 
 export function NotesPage() {
   const isCreateNoteOpen = useUIStore((state) => state.isCreateNoteOpen)
   const setCreateNoteOpen = useUIStore((state) => state.setCreateNoteOpen)
-  const openCreateNote = useUIStore((state) => state.openCreateNote)
+  const filters = useNotesFilters()
 
   return (
-    <div className="flex flex-col gap-4 text-left p-2">
+    <div className="flex flex-col gap-4 text-left p-2 h-full">
       <div>
         <h1 className="text-xl font-bold tracking-tight text-foreground">Notes</h1>
-        <p className="text-xs text-muted-foreground mt-0.5">
+        <p className="text-xs text-muted-foreground mt-0.5 font-medium leading-normal">
           View, organize, and construct your notes.
         </p>
       </div>
 
-      <div className="flex items-center justify-center min-h-[320px]">
-        <EmptyState
-          title="No notes added"
-          description="Create your first note to get started."
-          action={
-            <Button onClick={openCreateNote} size="sm" className="gap-1.5 cursor-pointer">
-              <Plus className="size-4" />
-              Add Note
-            </Button>
-          }
-        />
+      <NotesToolbarContainer filters={filters} />
+
+      <div className="flex-1 overflow-y-auto">
+        <NotesListContainer filters={filters} />
       </div>
 
       <CreateNoteContainer open={isCreateNoteOpen} onOpenChange={setCreateNoteOpen} />

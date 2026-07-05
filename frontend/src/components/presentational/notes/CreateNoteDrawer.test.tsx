@@ -1,10 +1,10 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach, type MockInstance } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import '@testing-library/jest-dom'
 import { CreateNoteDrawer } from './CreateNoteDrawer'
 
 describe('CreateNoteDrawer', () => {
-  let confirmMock: any
+  let confirmMock: MockInstance
 
   beforeEach(() => {
     confirmMock = vi.spyOn(window, 'confirm')

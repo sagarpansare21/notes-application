@@ -15,7 +15,7 @@ const meta: Meta<typeof MarkdownEditor> = {
 export default meta
 type Story = StoryObj<typeof MarkdownEditor>
 
-function InteractiveEditorWrapper(args: any) {
+function InteractiveEditorWrapper(args: React.ComponentProps<typeof MarkdownEditor>) {
   const [value, setValue] = useState(args.value || '')
   return (
     <div className="p-4 max-w-xl bg-card border border-border rounded-xl">

@@ -1,94 +1,81 @@
-import * as React from 'react'
-import { ChevronLeft, ChevronRight, MoreHorizontal } from 'lucide-react'
-import { Button } from './button'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
-export interface PaginationProps extends React.HTMLAttributes<HTMLElement> {
+interface PaginationProps {
   currentPage: number
   totalPages: number
   onPageChange: (page: number) => void
+  className?: string
 }
 
-export function Pagination({
-  currentPage,
-  totalPages,
-  onPageChange,
-  className,
-  ...props
-}: PaginationProps) {
-  const getPages = () => {
-    const pages: (number | 'ellipsis')[] = []
-    if (totalPages <= 5) {
-      for (let i = 1; i <= totalPages; i++) pages.push(i)
-    } else {
-      if (currentPage <= 3) {
-        pages.push(1, 2, 3, 'ellipsis', totalPages)
-      } else if (currentPage >= totalPages - 2) {
-        pages.push(1, 'ellipsis', totalPages - 2, totalPages - 1, totalPages)
-      } else {
-        pages.push(1, 'ellipsis', currentPage, 'ellipsis', totalPages)
-      }
-    }
-    return pages
+export function Pagination({ currentPage, totalPages, onPageChange, className }: PaginationProps) {
+  if (totalPages <= 1) return null
+
+  const getPages = (): (number | '...')[] => {
+    if (totalPages <= 7) return Array.from({ length: totalPages }, (_, i) => i + 1)
+
+    if (currentPage <= 4) return [1, 2, 3, 4, 5, '...', totalPages]
+    if (currentPage >= totalPages - 3) return [1, '...', totalPages - 4, totalPages - 3, totalPages - 2, totalPages - 1, totalPages]
+    return [1, '...', currentPage - 1, currentPage, currentPage + 1, '...', totalPages]
   }
 
+  const pages = getPages()
+
   return (
-    <nav
-      role="navigation"
-      aria-label="pagination"
-      className={cn("mx-auto flex w-full justify-center gap-1.5", className)}
-      {...props}
-    >
-      <Button
-        variant="ghost"
-        size="sm"
+    <div className={cn('flex items-center justify-center gap-1 mt-4 select-none', className)}>
+      {/* Prev */}
+      <button
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 1}
-        className="gap-1 pl-2.5 h-8 text-xs text-muted-foreground hover:text-foreground"
+        className={cn(
+          'flex items-center gap-1 px-2.5 py-1.5 rounded-md text-xs font-medium transition-colors',
+          'border border-border',
+          currentPage === 1
+            ? 'text-muted-foreground/40 cursor-not-allowed bg-transparent border-border/40'
+            : 'text-foreground hover:bg-accent cursor-pointer'
+        )}
       >
-        <ChevronLeft className="size-4" />
-        <span>Previous</span>
-      </Button>
+        <ChevronLeft className="size-3.5" />
+        Prev
+      </button>
 
-      <div className="flex items-center gap-1">
-        {getPages().map((page, index) => {
-          if (page === 'ellipsis') {
-            return (
-              <span
-                key={`ellipsis-${index}`}
-                className="flex size-8 items-center justify-center text-muted-foreground/60"
-              >
-                <MoreHorizontal className="size-4" />
-              </span>
-            )
-          }
+      {/* Page numbers */}
+      {pages.map((p, idx) =>
+        p === '...' ? (
+          <span key={`ellipsis-${idx}`} className="px-2 py-1.5 text-xs text-muted-foreground">
+            …
+          </span>
+        ) : (
+          <button
+            key={p}
+            onClick={() => onPageChange(p as number)}
+            className={cn(
+              'min-w-[32px] px-2.5 py-1.5 rounded-md text-xs font-medium transition-colors border cursor-pointer',
+              p === currentPage
+                ? 'bg-primary text-primary-foreground border-primary'
+                : 'border-border text-foreground hover:bg-accent'
+            )}
+          >
+            {p}
+          </button>
+        )
+      )}
 
-          const isCurrent = page === currentPage
-          return (
-            <Button
-              key={page}
-              variant={isCurrent ? 'default' : 'outline'}
-              size="icon-xs"
-              onClick={() => onPageChange(page)}
-              className={cn("size-8 text-xs font-medium", !isCurrent && "border-border hover:bg-muted")}
-              aria-current={isCurrent ? "page" : undefined}
-            >
-              {page}
-            </Button>
-          )
-        })}
-      </div>
-
-      <Button
-        variant="ghost"
-        size="sm"
+      {/* Next */}
+      <button
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage === totalPages}
-        className="gap-1 pr-2.5 h-8 text-xs text-muted-foreground hover:text-foreground"
+        className={cn(
+          'flex items-center gap-1 px-2.5 py-1.5 rounded-md text-xs font-medium transition-colors',
+          'border border-border',
+          currentPage === totalPages
+            ? 'text-muted-foreground/40 cursor-not-allowed bg-transparent border-border/40'
+            : 'text-foreground hover:bg-accent cursor-pointer'
+        )}
       >
-        <span>Next</span>
-        <ChevronRight className="size-4" />
-      </Button>
-    </nav>
+        Next
+        <ChevronRight className="size-3.5" />
+      </button>
+    </div>
   )
 }

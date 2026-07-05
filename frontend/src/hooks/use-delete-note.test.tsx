@@ -2,14 +2,12 @@ import React from 'react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { renderHook, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { useCreateNote } from './use-create-note'
-import { createNote } from '@/services/note-api'
+import { useDeleteNote } from './use-delete-note'
+import { deleteNote } from '@/services/note-api'
 import { toast } from '@/components/ui/toast'
-import type { Note } from '@/types/note'
 
-// Mock dependencies
 vi.mock('@/services/note-api', () => ({
-  createNote: vi.fn(),
+  deleteNote: vi.fn(),
 }))
 
 vi.mock('@/components/ui/toast', () => ({
@@ -19,7 +17,7 @@ vi.mock('@/components/ui/toast', () => ({
   },
 }))
 
-describe('useCreateNote', () => {
+describe('useDeleteNote', () => {
   let queryClient: QueryClient
 
   beforeEach(() => {
@@ -38,59 +36,45 @@ describe('useCreateNote', () => {
     </QueryClientProvider>
   )
 
-  it('handles successful note creation', async () => {
-    const mockNote = {
-      id: '1',
-      title: 'Success Title',
-      content: 'Success Content',
-      tags: [],
-    }
-
-    vi.mocked(createNote).mockResolvedValue(mockNote as unknown as Note)
+  it('handles successful note deletion', async () => {
+    vi.mocked(deleteNote).mockResolvedValue(undefined)
     const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries')
 
-    const onSuccess = vi.fn()
-    const { result } = renderHook(() => useCreateNote({ onSuccess }), { wrapper })
+    const { result } = renderHook(() => useDeleteNote(), { wrapper })
 
-    result.current.mutate({ title: 'Success Title', content: 'Success Content', tags: [] })
+    result.current.mutate('note-1')
 
     await waitFor(() => {
       expect(result.current.isSuccess).toBe(true)
     })
 
-    expect(createNote).toHaveBeenCalledWith({
-      title: 'Success Title',
-      content: 'Success Content',
-      tags: [],
-    })
-    expect(toast.success).toHaveBeenCalledWith('Note created successfully')
-    expect(onSuccess).toHaveBeenCalled()
+    expect(deleteNote).toHaveBeenCalledWith('note-1')
+    expect(toast.success).toHaveBeenCalledWith('Note moved to trash')
 
-    // Assert cache invalidations
     expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['notes'] })
     expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['dashboard'] })
     expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['tags'] })
   })
 
-  it('handles note creation errors', async () => {
+  it('handles note deletion errors', async () => {
     const errorResponse = {
       response: {
         data: {
-          message: 'Server error: Invalid payload',
+          message: 'Server error: delete failed',
         },
       },
     }
 
-    vi.mocked(createNote).mockRejectedValue(errorResponse)
+    vi.mocked(deleteNote).mockRejectedValue(errorResponse)
 
-    const { result } = renderHook(() => useCreateNote(), { wrapper })
+    const { result } = renderHook(() => useDeleteNote(), { wrapper })
 
-    result.current.mutate({ title: 'Fail', content: 'Fail', tags: [] })
+    result.current.mutate('note-1')
 
     await waitFor(() => {
       expect(result.current.isError).toBe(true)
     })
 
-    expect(toast.error).toHaveBeenCalledWith('Server error: Invalid payload')
+    expect(toast.error).toHaveBeenCalledWith('Server error: delete failed')
   })
 })

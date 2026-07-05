@@ -9,17 +9,31 @@ import tseslint from 'typescript-eslint'
 import { defineConfig, globalIgnores } from 'eslint/config'
 import eslintConfigPrettier from 'eslint-config-prettier'
 
-export default defineConfig([globalIgnores(['dist']), {
-  files: ['**/*.{ts,tsx}'],
-  extends: [
-    js.configs.recommended,
-    tseslint.configs.recommended,
-    reactHooks.configs.flat.recommended,
-    reactRefresh.configs.vite,
-    eslintConfigPrettier,
-  ],
-  languageOptions: {
-    globals: globals.browser,
+export default defineConfig([
+  globalIgnores(['dist', 'storybook-static', 'coverage', '.vitest-attachments']),
+  {
+    files: ['**/*.{ts,tsx}'],
+    extends: [
+      js.configs.recommended,
+      tseslint.configs.recommended,
+      reactHooks.configs.flat.recommended,
+      reactRefresh.configs.vite,
+      eslintConfigPrettier,
+    ],
+    languageOptions: {
+      globals: globals.browser,
+    },
+    rules: {
+      'react-refresh/only-export-components': 'off',
+      'react-hooks/set-state-in-effect': 'off',
+    },
   },
-}, ...storybook.configs["flat/recommended"]])
+  ...storybook.configs["flat/recommended"],
+  {
+    files: ['**/*.stories.tsx', '**/*.stories.ts'],
+    rules: {
+      'storybook/no-renderer-packages': 'off',
+    },
+  },
+])
 

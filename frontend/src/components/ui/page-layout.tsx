@@ -1,4 +1,4 @@
-import { useState, useEffect, Suspense } from 'react'
+import { useEffect, Suspense } from 'react'
 import { Outlet } from 'react-router'
 import { Sidebar } from '../layout/sidebar'
 import { Header } from '../layout/header'
@@ -6,12 +6,13 @@ import { cn } from '@/lib/utils'
 import { useUIStore } from '@/hooks/use-ui-store'
 
 export function PageLayout() {
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
-  const [mobileOpen, setMobileOpen] = useState(false)
+  const sidebarCollapsed = useUIStore((state) => state.sidebarCollapsed)
+  const setSidebarCollapsed = useUIStore((state) => state.setSidebarCollapsed)
+  const mobileOpen = useUIStore((state) => state.mobileOpen)
+  const setMobileOpen = useUIStore((state) => state.setMobileOpen)
   const openCreateNote = useUIStore((state) => state.openCreateNote)
-  const [darkMode, setDarkMode] = useState(() => {
-    return document.documentElement.classList.contains('dark')
-  })
+  const darkMode = useUIStore((state) => state.darkMode)
+  const toggleDarkMode = useUIStore((state) => state.toggleDarkMode)
 
   useEffect(() => {
     if (darkMode) {
@@ -59,7 +60,7 @@ export function PageLayout() {
           onSidebarExpand={() => setSidebarCollapsed(false)}
           onMobileOpen={() => setMobileOpen(true)}
           darkMode={darkMode}
-          onToggleDarkMode={() => setDarkMode(!darkMode)}
+          onToggleDarkMode={toggleDarkMode}
           onNewNote={openCreateNote}
         />
 

@@ -8,12 +8,26 @@ export const DropdownMenuTrigger = MenuPrimitive.Trigger
 
 export const DropdownMenuPortal = MenuPrimitive.Portal
 
+export interface DropdownMenuContentProps
+  extends React.ComponentPropsWithoutRef<typeof MenuPrimitive.Popup> {
+  align?: 'start' | 'center' | 'end'
+  side?: 'top' | 'right' | 'bottom' | 'left'
+  sideOffset?: number
+  alignOffset?: number
+}
+
 export const DropdownMenuContent = React.forwardRef<
   HTMLDivElement,
-  React.ComponentPropsWithoutRef<typeof MenuPrimitive.Popup>
->(({ className, ...props }, ref) => (
+  DropdownMenuContentProps
+>(({ className, align, side, sideOffset = 4, alignOffset, ...props }, ref) => (
   <MenuPrimitive.Portal>
-    <MenuPrimitive.Positioner sideOffset={4} className="z-50">
+    <MenuPrimitive.Positioner
+      side={side}
+      sideOffset={sideOffset}
+      align={align}
+      alignOffset={alignOffset}
+      className="z-50"
+    >
       <MenuPrimitive.Popup
         ref={ref}
         className={cn(
