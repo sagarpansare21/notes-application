@@ -41,6 +41,11 @@ self.addEventListener('activate', (event) => {
 
 // Fetch event: Network-first fallback to Cache for assets, Network-only for backend APIs
 self.addEventListener('fetch', (event) => {
+  // Only intercept GET requests (ignore POST, DELETE, PATCH, etc.)
+  if (event.request.method !== 'GET') {
+    return
+  }
+
   const requestUrl = new URL(event.request.url)
 
   // Bypasses APIs, hot reload streams, and prisma studio (don't cache backend request pipelines)
