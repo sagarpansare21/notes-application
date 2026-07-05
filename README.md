@@ -110,6 +110,7 @@ http://localhost:3000/docs
 ```bash
 cd frontend
 npm install
+cp .env.example .env
 npm run dev
 ```
 
