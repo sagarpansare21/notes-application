@@ -9,7 +9,7 @@ import {
 } from '../components/ui/card'
 
 const meta: Meta<typeof Card> = {
-  title: 'UI/Card',
+  title: 'Components/UI/Card',
   component: Card,
   tags: ['autodocs'],
   argTypes: {

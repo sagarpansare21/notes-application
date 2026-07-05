@@ -11,7 +11,7 @@ import { HelpCircle } from 'lucide-react'
  * Use for describing icon-only buttons, explaining form details, defining specific labels.
  */
 const meta: Meta<typeof Tooltip> = {
-  title: 'Components/Tooltip',
+  title: 'Components/UI/Tooltip',
   component: Tooltip,
   parameters: {
     docs: {

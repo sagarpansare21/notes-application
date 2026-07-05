@@ -11,7 +11,7 @@ import { Settings, FileText, Trash2 } from 'lucide-react'
  * Use in list menu actions, header user settings menus, tag filters sorting triggers.
  */
 const meta: Meta<typeof DropdownMenu> = {
-  title: 'Components/Dropdown',
+  title: 'Components/UI/Dropdown',
   component: DropdownMenu,
   parameters: {
     docs: {

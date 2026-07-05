@@ -15,7 +15,7 @@ import { Checkbox } from '../components/ui/checkbox'
  * Inherits standard checkbox controls (Spacebar toggles) and reports `aria-checked` states natively.
  */
 const meta: Meta<typeof Checkbox> = {
-  title: 'Components/Checkbox',
+  title: 'Components/UI/Checkbox',
   component: Checkbox,
   parameters: {
     docs: {

@@ -10,7 +10,7 @@ import { Button } from '../components/ui/button'
  * Use for mobile navigation panels, expanded details viewing, multi-step configurations.
  */
 const meta: Meta<typeof Drawer> = {
-  title: 'Components/Drawer',
+  title: 'Components/UI/Drawer',
   component: Drawer,
   parameters: {
     docs: {

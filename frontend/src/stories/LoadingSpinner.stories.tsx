@@ -9,7 +9,7 @@ import { LoadingSpinner } from '../components/ui/loading-spinner'
  * Use inside loading buttons, spinner frames, and background database sync indicators.
  */
 const meta: Meta<typeof LoadingSpinner> = {
-  title: 'Components/LoadingSpinner',
+  title: 'Components/UI/LoadingSpinner',
   component: LoadingSpinner,
   parameters: {
     docs: {

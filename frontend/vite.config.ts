@@ -19,25 +19,72 @@ export default defineConfig({
     }
   },
   test: {
-    projects: [{
-      extends: true,
-      plugins: [
-      // The plugin will run tests for the stories defined in your Storybook config
-      // See options at: https://storybook.js.org/docs/next/writing-tests/integrations/vitest-addon#storybooktest
-      storybookTest({
-        configDir: path.join(dirname, '.storybook')
-      })],
-      test: {
-        name: 'storybook',
-        browser: {
-          enabled: true,
-          headless: true,
-          provider: playwright({}),
-          instances: [{
-            browser: 'chromium'
-          }]
+    coverage: {
+      provider: 'v8',
+      all: true,
+      include: ['src/**/*'],
+      exclude: [
+        'src/main.tsx',
+        'src/routes.tsx',
+        'src/stories/**/*',
+        '**/*.stories.tsx',
+        '**/*.test.tsx',
+        '**/*.test.ts',
+        '**/*.d.ts',
+        'src/types/**/*',
+        'src/assets/**/*',
+        '**/*.css',
+        '**/*.png',
+        '**/*.svg',
+        '**/*.ico',
+        'src/components/ui/**/*',
+        'src/components/layout/**/*',
+        'src/containers/**/*',
+        'src/lib/**/*',
+        'src/pages/**/*',
+        'src/providers/**/*'
+      ]
+    },
+    projects: [
+      {
+        extends: true,
+        plugins: [
+          // The plugin will run tests for the stories defined in your Storybook config
+          // See options at: https://storybook.js.org/docs/next/writing-tests/integrations/vitest-addon#storybooktest
+          storybookTest({
+            configDir: path.join(dirname, '.storybook')
+          })
+        ],
+        test: {
+          name: 'storybook',
+          browser: {
+            enabled: true,
+            headless: true,
+            provider: playwright({}),
+            instances: [{
+              browser: 'chromium'
+            }],
+            screenshotFailures: false
+          }
+        }
+      },
+      {
+        extends: true,
+        test: {
+          name: 'unit',
+          globals: true,
+          include: ['src/**/*.test.{ts,tsx}'],
+          browser: {
+            enabled: true,
+            headless: true,
+            provider: playwright({}),
+            instances: [{
+              browser: 'chromium'
+            }],
+            screenshotFailures: false
+          }
         }
       }
-    }]
+    ]
   }
 });

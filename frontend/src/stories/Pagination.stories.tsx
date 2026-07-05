@@ -10,7 +10,7 @@ import { Pagination } from '../components/ui/pagination'
  * Use for notes lists or audit logs extending past 20 items.
  */
 const meta: Meta<typeof Pagination> = {
-  title: 'Components/Pagination',
+  title: 'Components/UI/Pagination',
   component: Pagination,
   parameters: {
     docs: {

@@ -12,7 +12,7 @@ import { Switch } from '../components/ui/switch'
  * Do not use inside large form submissions where changes should only apply after a Submit click (use Checkbox instead).
  */
 const meta: Meta<typeof Switch> = {
-  title: 'Components/Switch',
+  title: 'Components/UI/Switch',
   component: Switch,
   parameters: {
     docs: {

@@ -9,7 +9,7 @@ import { Avatar, AvatarImage, AvatarFallback } from '../components/ui/avatar'
  * Use in sidebar footers, commenting lists, profile dropdown triggers, and settings panels.
  */
 const meta: Meta<typeof Avatar> = {
-  title: 'Components/Avatar',
+  title: 'Components/UI/Avatar',
   component: Avatar,
   parameters: {
     docs: {

@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite'
 import { ErrorState } from '../components/ui/error-state'
 
 const meta: Meta<typeof ErrorState> = {
-  title: 'UI/ErrorState',
+  title: 'Components/UI/ErrorState',
   component: ErrorState,
   tags: ['autodocs'],
   argTypes: {

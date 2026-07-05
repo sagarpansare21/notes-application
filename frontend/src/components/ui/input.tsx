@@ -11,7 +11,7 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
 
 export const Input = React.forwardRef<HTMLInputElement, InputProps>(
   (
-    { className, type = 'text', error, label, helperText, leftIcon, rightIcon, id, ...props },
+    { className, type = 'text', error, label, helperText, leftIcon, rightIcon, id, required, ...props },
     ref
   ) => {
     const defaultId = React.useId()
@@ -27,6 +27,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
             className="text-xs font-medium text-muted-foreground select-none"
           >
             {label}
+            {required && <span className="text-destructive ml-0.5">*</span>}
           </label>
         )}
         <div className="relative flex items-center w-full">
@@ -39,12 +40,13 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
             id={inputId}
             type={type}
             ref={ref}
+            required={required}
             className={cn(
-              'w-full rounded-lg border border-border bg-background px-3 py-1.5 text-sm text-foreground transition-all duration-150 ease-in-out placeholder:text-muted-foreground outline-none shadow-sm shadow-black/5 hover:border-muted-foreground/30 focus:border-ring focus:ring-3 focus:ring-ring/20 disabled:cursor-not-allowed disabled:opacity-50',
+              'w-full rounded-lg border border-border bg-background px-3 py-1.5 text-sm text-foreground transition-all duration-150 ease-in-out placeholder:text-muted-foreground outline-none hover:border-muted-foreground/30 focus:border-ring disabled:cursor-not-allowed disabled:opacity-50',
               leftIcon && 'pl-9',
               rightIcon && 'pr-9',
               error &&
-                'border-destructive focus:border-destructive focus:ring-destructive/20 hover:border-destructive',
+                'border-destructive focus:border-destructive hover:border-destructive',
               className
             )}
             aria-invalid={!!error}

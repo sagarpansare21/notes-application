@@ -4,7 +4,7 @@ import { Button } from '../components/ui/button'
 import { FileText, Tag, Trash2, Search, Plus } from 'lucide-react'
 
 const meta: Meta<typeof EmptyState> = {
-  title: 'UI/EmptyState',
+  title: 'Components/UI/EmptyState',
   component: EmptyState,
   tags: ['autodocs'],
   argTypes: {

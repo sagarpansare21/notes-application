@@ -9,7 +9,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '../components/ui/tabs'
  * Use for configuration tabs (Profile, Database, Editor settings) or categorizing views.
  */
 const meta: Meta<typeof Tabs> = {
-  title: 'Components/Tabs',
+  title: 'Components/UI/Tabs',
   component: Tabs,
   parameters: {
     docs: {

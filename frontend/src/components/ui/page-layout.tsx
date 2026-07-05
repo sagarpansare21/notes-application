@@ -3,10 +3,12 @@ import { Outlet } from 'react-router'
 import { Sidebar } from '../layout/sidebar'
 import { Header } from '../layout/header'
 import { cn } from '@/lib/utils'
+import { useUIStore } from '@/hooks/use-ui-store'
 
 export function PageLayout() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
+  const openCreateNote = useUIStore((state) => state.openCreateNote)
   const [darkMode, setDarkMode] = useState(() => {
     return document.documentElement.classList.contains('dark')
   })
@@ -58,11 +60,11 @@ export function PageLayout() {
           onMobileOpen={() => setMobileOpen(true)}
           darkMode={darkMode}
           onToggleDarkMode={() => setDarkMode(!darkMode)}
-          onNewNote={() => alert('New note created!')}
+          onNewNote={openCreateNote}
         />
 
-        <main className="flex-1 overflow-y-auto focus:outline-none transition-all duration-200">
-          <Suspense fallback={<div className="p-8 text-xs text-muted-foreground">Loading...</div>}>
+        <main className="p-4 flex-1 overflow-y-auto focus:outline-none transition-all duration-200">
+          <Suspense fallback={<div className="text-xs text-muted-foreground">Loading...</div>}>
             <Outlet />
           </Suspense>
         </main>

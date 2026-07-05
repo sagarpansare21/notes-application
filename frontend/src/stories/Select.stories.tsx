@@ -15,7 +15,7 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '.
  * Fully keyboard navigation compliant (Up/Down arrow keys, Enter, Escape to close) with correct ARIA selection states.
  */
 const meta: Meta<typeof Select> = {
-  title: 'Components/Select',
+  title: 'Components/UI/Select',
   component: Select,
   parameters: {
     docs: {

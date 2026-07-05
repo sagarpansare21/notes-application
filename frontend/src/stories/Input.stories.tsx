@@ -3,7 +3,7 @@ import { Input } from '../components/ui/input'
 import { expect, userEvent, within } from 'storybook/test'
 
 const meta: Meta<typeof Input> = {
-  title: 'UI/Input',
+  title: 'Components/UI/Input',
   component: Input,
   tags: ['autodocs'],
   argTypes: {

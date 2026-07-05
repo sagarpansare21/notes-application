@@ -29,20 +29,22 @@ export const DrawerContent = React.forwardRef<
 >(({ className, children, ...props }, ref) => (
   <DrawerPortal>
     <DrawerBackdrop />
-    <DrawerPrimitive.Popup
-      ref={ref}
-      className={cn(
-        "fixed inset-y-0 right-0 z-50 h-full w-full max-w-sm border-l border-border bg-background p-5 shadow-lg transition-transform duration-300 ease-in-out focus:outline-none animate-in slide-in-from-right",
-        className
-      )}
-      {...props}
-    >
-      {children}
-      <DrawerPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring">
-        <X className="size-4" />
-        <span className="sr-only">Close</span>
-      </DrawerPrimitive.Close>
-    </DrawerPrimitive.Popup>
+    <DrawerPrimitive.Viewport className="fixed inset-0 z-50 flex justify-end pointer-events-none">
+      <DrawerPrimitive.Popup
+        ref={ref}
+        className={cn(
+          "pointer-events-auto h-full w-full max-w-sm border-l border-border bg-background p-5 shadow-lg transition-transform duration-300 ease-in-out focus:outline-none animate-in slide-in-from-right",
+          className
+        )}
+        {...props}
+      >
+        {children}
+        <DrawerPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring">
+          <X className="size-4" />
+          <span className="sr-only">Close</span>
+        </DrawerPrimitive.Close>
+      </DrawerPrimitive.Popup>
+    </DrawerPrimitive.Viewport>
   </DrawerPortal>
 ))
 DrawerContent.displayName = 'DrawerContent'

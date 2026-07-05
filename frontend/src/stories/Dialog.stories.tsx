@@ -13,7 +13,7 @@ import { Button } from '../components/ui/button'
  * Uses backdrop focus traps. Automatically locks page scrolling and focuses on Dialog contents. Supports escape key triggers.
  */
 const meta: Meta<typeof Dialog> = {
-  title: 'Components/Dialog',
+  title: 'Components/UI/Dialog',
   component: Dialog,
   parameters: {
     docs: {

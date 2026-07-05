@@ -12,7 +12,7 @@ import { RadioGroup, RadioGroupItem } from '../components/ui/radio'
  * Do not use for listing more than 5 options (use Select dropdown list to preserve screen layout).
  */
 const meta: Meta<typeof RadioGroup> = {
-  title: 'Components/Radio',
+  title: 'Components/UI/Radio',
   component: RadioGroup,
   parameters: {
     docs: {

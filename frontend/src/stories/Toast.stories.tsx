@@ -11,7 +11,7 @@ import { Toaster } from 'sonner'
  * Use for informing user about background operations (successful backup sync, connection reconnects, deletes).
  */
 const meta: Meta<typeof Button> = {
-  title: 'Components/Toast',
+  title: 'Components/UI/Toast',
   parameters: {
     docs: {
       autodocs: true,
