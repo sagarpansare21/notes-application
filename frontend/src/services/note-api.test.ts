@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { getNotes, getTags, createNote, deleteNote, exportNotes, getTrashNotes, restoreNote, deleteNotePermanently } from './note-api'
+import { getNotes, getTags, createNote, deleteNote, exportNotes, getTrashNotes, restoreNote, deleteNotePermanently, importNotes } from './note-api'
 import { api } from '@/lib/axios'
 
 vi.mock('@/lib/axios', () => {
@@ -201,6 +201,23 @@ describe('note-api', () => {
 
       await deleteNotePermanently('trash-1')
       expect(api.delete).toHaveBeenCalledWith('/v1/trash/trash-1')
+    })
+  })
+
+  describe('importNotes', () => {
+    it('calls api.post with formData and returns stats', async () => {
+      const mockStats = { imported: 5, skipped: 1, failed: 0 }
+      vi.mocked(api.post).mockResolvedValue({
+        data: { success: true, data: mockStats },
+      })
+
+      const file = new File(['[]'], 'notes.json', { type: 'application/json' })
+      const result = await importNotes(file)
+
+      expect(api.post).toHaveBeenCalledWith('/v1/notes/import', expect.any(FormData), {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      })
+      expect(result).toEqual(mockStats)
     })
   })
 

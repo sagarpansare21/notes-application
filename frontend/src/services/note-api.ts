@@ -62,6 +62,21 @@ export async function deleteNotePermanently(id: string): Promise<void> {
   await api.delete(`/v1/trash/${id}`)
 }
 
+export async function importNotes(file: File): Promise<{ imported: number; skipped: number; failed: number }> {
+  const formData = new FormData()
+  formData.append('file', file)
+  const response = await api.post<{ success: boolean; message: string; data: { imported: number; skipped: number; failed: number } }>(
+    '/v1/notes/import',
+    formData,
+    {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    }
+  )
+  return response.data.data
+}
+
 export async function exportNotes(format: 'json' | 'markdown'): Promise<Blob> {
   const response = await api.get(`/v1/notes/export`, {
     params: { format },

@@ -55,22 +55,28 @@
 }
 
 :root {
-  --background: oklch(0.99 0 0); /* Off-white #fcfcfc */
-  --foreground: oklch(0.18 0.005 240); /* Charcoal #18181b */
-  --card: oklch(1 0 0); /* Pure White */
+  --background: oklch(0.99 0 0);
+  /* Off-white #fcfcfc */
+  --foreground: oklch(0.18 0.005 240);
+  /* Charcoal #18181b */
+  --card: oklch(1 0 0);
+  /* Pure White */
   --card-foreground: oklch(0.18 0.005 240);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.18 0.005 240);
-  --primary: oklch(0.2 0.01 240); /* Slate Dark Primary */
+  --primary: oklch(0.2 0.01 240);
+  /* Slate Dark Primary */
   --primary-foreground: oklch(0.99 0 0);
-  --secondary: oklch(0.96 0.005 240); /* Soft gray */
+  --secondary: oklch(0.96 0.005 240);
+  /* Soft gray */
   --secondary-foreground: oklch(0.2 0.01 240);
   --muted: oklch(0.96 0.005 240);
   --muted-foreground: oklch(0.55 0.01 240);
   --accent: oklch(0.96 0.005 240);
   --accent-foreground: oklch(0.2 0.01 240);
   --destructive: oklch(0.6 0.18 20);
-  --border: oklch(0.92 0.005 240); /* Zinc-200 boundary */
+  --border: oklch(0.92 0.005 240);
+  /* Zinc-200 boundary */
   --input: oklch(0.92 0.005 240);
   --ring: oklch(0.2 0.01 240);
   --chart-1: oklch(0.6 0.18 240);
@@ -90,13 +96,17 @@
 }
 
 .dark {
-  --background: oklch(0.12 0.005 240); /* Linear Dark Grey #0b0b0f */
-  --foreground: oklch(0.93 0.005 240); /* Light Grey #e4e4e7 */
-  --card: oklch(0.15 0.005 240); /* Lighter Grey #18181b */
+  --background: oklch(0.12 0.005 240);
+  /* Linear Dark Grey #0b0b0f */
+  --foreground: oklch(0.93 0.005 240);
+  /* Light Grey #e4e4e7 */
+  --card: oklch(0.15 0.005 240);
+  /* Lighter Grey #18181b */
   --card-foreground: oklch(0.93 0.005 240);
   --popover: oklch(0.15 0.005 240);
   --popover-foreground: oklch(0.93 0.005 240);
-  --primary: oklch(0.98 0.005 240); /* Solid white/light grey */
+  --primary: oklch(0.98 0.005 240);
+  /* Solid white/light grey */
   --primary-foreground: oklch(0.12 0.005 240);
   --secondary: oklch(0.2 0.005 240);
   --secondary-foreground: oklch(0.98 0.005 240);
@@ -105,7 +115,8 @@
   --accent: oklch(0.2 0.005 240);
   --accent-foreground: oklch(0.98 0.005 240);
   --destructive: oklch(0.5 0.15 20);
-  --border: oklch(0.22 0.005 240); /* Zinc-800 line */
+  --border: oklch(0.22 0.005 240);
+  /* Zinc-800 line */
   --input: oklch(0.22 0.005 240);
   --ring: oklch(0.8 0.005 240);
   --sidebar: oklch(0.11 0.005 240);
@@ -122,11 +133,21 @@
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground transition-colors duration-200 antialiased;
   }
+
   html {
     @apply font-sans;
+  }
+
+  button:not(:disabled) {
+    @apply cursor-pointer;
+  }
+
+  button:disabled {
+    @apply cursor-not-allowed;
   }
 }
 
@@ -134,34 +155,41 @@
 .ProseMirror {
   outline: none;
 }
+
 .ProseMirror p {
   margin-bottom: 0.75rem;
 }
+
 .ProseMirror h1 {
   font-size: 1.5rem;
   font-weight: 700;
   margin-top: 1.5rem;
   margin-bottom: 0.5rem;
 }
+
 .ProseMirror h2 {
   font-size: 1.25rem;
   font-weight: 600;
   margin-top: 1.25rem;
   margin-bottom: 0.5rem;
 }
+
 .ProseMirror ul {
   list-style-type: disc;
   padding-left: 1.5rem;
   margin-bottom: 0.75rem;
 }
+
 .ProseMirror ol {
   list-style-type: decimal;
   padding-left: 1.5rem;
   margin-bottom: 0.75rem;
 }
+
 .ProseMirror li {
   margin-bottom: 0.25rem;
 }
+
 .ProseMirror blockquote {
   border-left: 3px solid var(--border);
   padding-left: 1rem;
@@ -169,6 +197,7 @@
   color: var(--muted-foreground);
   margin-bottom: 0.75rem;
 }
+
 .ProseMirror pre {
   background-color: var(--secondary);
   border: 1px solid var(--border);
@@ -178,6 +207,7 @@
   overflow-x: auto;
   margin-bottom: 0.75rem;
 }
+
 .ProseMirror code {
   background-color: var(--secondary);
   border: 1px solid var(--border);
@@ -186,6 +216,7 @@
   font-family: monospace;
   font-size: 0.85em;
 }
+
 .ProseMirror hr {
   border: none;
   border-top: 1px solid var(--border);
