@@ -285,7 +285,73 @@ export class NoteRepository {
         where: { id },
         include: { tags: true },
       });
+
+      // Clean up tags that are no longer associated with any notes
+      const unusedTags = await tx.tag.findMany({
+        where: {
+          notes: {
+            none: {},
+          },
+        },
+        select: { id: true },
+      });
+
+      const unusedTagIds = unusedTags.map((t) => t.id);
+      if (unusedTagIds.length > 0) {
+        await tx.tag.deleteMany({
+          where: {
+            id: { in: unusedTagIds },
+          },
+        });
+      }
+
       return mapToDomain(note);
+    });
+  }
+
+  async emptyTrash(): Promise<number> {
+    return await prisma.$transaction(async (tx) => {
+      const deletedNotes = await tx.note.findMany({
+        where: { deletedAt: { not: null } },
+        select: { id: true }
+      });
+      const ids = deletedNotes.map(n => n.id);
+      
+      for (const id of ids) {
+        await tx.note.update({
+          where: { id },
+          data: {
+            tags: {
+              set: [],
+            },
+          },
+        });
+      }
+
+      const result = await tx.note.deleteMany({
+        where: { id: { in: ids } }
+      });
+
+      // Clean up tags that are no longer associated with any notes
+      const unusedTags = await tx.tag.findMany({
+        where: {
+          notes: {
+            none: {},
+          },
+        },
+        select: { id: true },
+      });
+
+      const unusedTagIds = unusedTags.map((t) => t.id);
+      if (unusedTagIds.length > 0) {
+        await tx.tag.deleteMany({
+          where: {
+            id: { in: unusedTagIds },
+          },
+        });
+      }
+
+      return result.count;
     });
   }
 }

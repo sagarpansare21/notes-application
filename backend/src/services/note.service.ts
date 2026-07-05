@@ -230,5 +230,9 @@ export class NoteService {
     }
     return noteRepository.hardDelete(id);
   }
+
+  async emptyTrash(): Promise<number> {
+    return noteRepository.emptyTrash();
+  }
 }
 export const noteService = new NoteService();

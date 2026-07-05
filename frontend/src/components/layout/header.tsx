@@ -1,5 +1,5 @@
 import { useLocation } from 'react-router'
-import { Menu, PanelLeft, Search, Sun, Moon, Plus } from 'lucide-react'
+import { Menu, PanelLeft, Search, Sun, Moon } from 'lucide-react'
 import { Button } from '../ui/button'
 
 interface HeaderProps {
@@ -8,7 +8,6 @@ interface HeaderProps {
   onMobileOpen: () => void
   darkMode: boolean
   onToggleDarkMode: () => void
-  onNewNote?: () => void
 }
 
 export function Header({
@@ -16,8 +15,7 @@ export function Header({
   onSidebarExpand,
   onMobileOpen,
   darkMode,
-  onToggleDarkMode,
-  onNewNote
+  onToggleDarkMode
 }: HeaderProps) {
   const location = useLocation()
   const pathname = location.pathname
@@ -25,8 +23,6 @@ export function Header({
   const getTabLabel = () => {
     switch (pathname) {
       case '/':
-        return 'Dashboard'
-      case '/notes':
         return 'Notes'
       case '/tags':
         return 'Tags'
@@ -35,7 +31,7 @@ export function Header({
       case '/export-import':
         return 'Export / Import'
       default:
-        return 'Dashboard'
+        return 'Notes'
     }
   }
 
@@ -92,10 +88,6 @@ export function Header({
           aria-label="Toggle theme"
         >
           {darkMode ? <Sun className="size-4 text-yellow-500" /> : <Moon className="size-4" />}
-        </Button>
-        <Button size="sm" className="h-8 gap-1.5 px-3" onClick={onNewNote}>
-          <Plus className="size-3.5" />
-          <span className="hidden sm:inline">New Note</span>
         </Button>
       </div>
     </header>

@@ -70,7 +70,6 @@ export function PageLayout() {
           onMobileOpen={() => setMobileOpen(true)}
           darkMode={darkMode}
           onToggleDarkMode={toggleDarkMode}
-          onNewNote={openCreateNote}
         />
 
         <main className="p-4 flex-1 overflow-y-auto focus:outline-none transition-all duration-200">

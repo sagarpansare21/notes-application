@@ -108,6 +108,11 @@ export class NoteController {
     const note = await noteService.permanentDeleteNote(id);
     return reply.status(200).send(successResponse("Note permanently deleted successfully", note));
   }
+
+  async emptyTrash(request: any, reply: any) {
+    const count = await noteService.emptyTrash();
+    return reply.status(200).send(successResponse("Trash emptied successfully", { count }));
+  }
 }
 
 export const noteController = new NoteController();

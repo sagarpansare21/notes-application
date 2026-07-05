@@ -415,6 +415,38 @@ export const noteRoutes: FastifyPluginAsync = async (fastify) => {
     handler: noteController.restoreNote,
   });
 
+  // Empty trash
+  fastify.delete("/trash", {
+    schema: {
+      summary: "Empty the trash",
+      description: "Permanently deletes all soft-deleted notes from the database.",
+      tags: ["Notes"],
+      response: {
+        200: {
+          description: "Trash emptied successfully",
+          type: "object",
+          properties: {
+            success: { type: "boolean", example: true },
+            message: { type: "string", example: "Trash emptied successfully" },
+            data: {
+              type: "object",
+              properties: {
+                count: { type: "integer", description: "Number of permanently deleted notes", example: 5 },
+              },
+              required: ["count"],
+            },
+          },
+          required: ["success", "message", "data"],
+        },
+        500: {
+          description: "Internal server error occurred",
+          $ref: "apiErrorResponse#",
+        },
+      },
+    },
+    handler: noteController.emptyTrash,
+  });
+
   // Permanent delete note by ID
   fastify.delete("/trash/:id", {
     schema: {

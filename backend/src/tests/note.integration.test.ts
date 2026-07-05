@@ -443,5 +443,49 @@ describe("API Integration Tests (Fastify inject)", () => {
       });
       expect(missingRes.statusCode).toBe(404);
     });
+
+    it("DELETE /api/v1/trash - should permanently delete all soft-deleted notes", async () => {
+      // 1. Create a note and soft delete it
+      const createRes1 = await app.inject({
+        method: "POST",
+        url: "/api/v1/notes",
+        payload: { title: "Trash A", content: "To be cleared" }
+      });
+      const note1 = JSON.parse(createRes1.payload).data;
+      await app.inject({
+        method: "DELETE",
+        url: `/api/v1/notes/${note1.id}`
+      });
+
+      // 2. Create another note and soft delete it
+      const createRes2 = await app.inject({
+        method: "POST",
+        url: "/api/v1/notes",
+        payload: { title: "Trash B", content: "To be cleared too" }
+      });
+      const note2 = JSON.parse(createRes2.payload).data;
+      await app.inject({
+        method: "DELETE",
+        url: `/api/v1/notes/${note2.id}`
+      });
+
+      // 3. Clear trash
+      const clearRes = await app.inject({
+        method: "DELETE",
+        url: "/api/v1/trash"
+      });
+      expect(clearRes.statusCode).toBe(200);
+      const clearBody = JSON.parse(clearRes.payload);
+      expect(clearBody.success).toBe(true);
+      expect(clearBody.data.count).toBeGreaterThanOrEqual(2);
+
+      // 4. Verify trash is empty
+      const getTrashRes = await app.inject({
+        method: "GET",
+        url: "/api/v1/trash"
+      });
+      const trashNotes = JSON.parse(getTrashRes.payload).data;
+      expect(trashNotes).toHaveLength(0);
+    });
   });
 });

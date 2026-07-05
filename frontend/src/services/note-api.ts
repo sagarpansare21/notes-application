@@ -62,6 +62,10 @@ export async function deleteNotePermanently(id: string): Promise<void> {
   await api.delete(`/v1/trash/${id}`)
 }
 
+export async function emptyTrash(): Promise<void> {
+  await api.delete('/v1/trash')
+}
+
 export async function importNotes(file: File): Promise<{ imported: number; skipped: number; failed: number }> {
   const formData = new FormData()
   formData.append('file', file)

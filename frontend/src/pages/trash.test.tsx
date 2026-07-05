@@ -6,6 +6,7 @@ import { TrashPage } from './trash'
 import { useTrashNotes } from '@/hooks/use-trash-notes'
 import { useRestoreNote } from '@/hooks/use-restore-note'
 import { useDeletePermanently } from '@/hooks/use-delete-permanently'
+import { useEmptyTrash } from '@/hooks/use-empty-trash'
 
 vi.mock('@/hooks/use-trash-notes', () => ({
   useTrashNotes: vi.fn(),
@@ -19,9 +20,14 @@ vi.mock('@/hooks/use-delete-permanently', () => ({
   useDeletePermanently: vi.fn(),
 }))
 
+vi.mock('@/hooks/use-empty-trash', () => ({
+  useEmptyTrash: vi.fn(),
+}))
+
 describe('TrashPage', () => {
   const mockRestoreMutate = vi.fn()
   const mockDeleteMutate = vi.fn()
+  const mockEmptyMutate = vi.fn()
 
   const mockNotes = [
     { id: '1', title: 'Note in Trash', content: 'Deleted markdown content', tags: [], createdAt: '', updatedAt: '' },
@@ -37,6 +43,11 @@ describe('TrashPage', () => {
 
     vi.mocked(useDeletePermanently).mockReturnValue({
       mutate: mockDeleteMutate,
+      isPending: false,
+    } as any)
+
+    vi.mocked(useEmptyTrash).mockReturnValue({
+      mutate: mockEmptyMutate,
       isPending: false,
     } as any)
   })
@@ -96,6 +107,29 @@ describe('TrashPage', () => {
 
     await waitFor(() => {
       expect(mockDeleteMutate).toHaveBeenCalledWith('1')
+    })
+  })
+
+  it('triggers empty trash mutation from empty trash confirmation dialog', async () => {
+    vi.mocked(useTrashNotes).mockReturnValue({
+      data: mockNotes,
+      isLoading: false,
+      isError: false,
+      error: null,
+      refetch: vi.fn(),
+    } as any)
+
+    render(<TrashPage />)
+
+    const emptyBtn = screen.getByRole('button', { name: /Empty Trash/i })
+    fireEvent.click(emptyBtn)
+
+    // Click Empty Trash confirmation button in modal
+    const confirmBtn = screen.getByRole('button', { name: 'Empty Trash' })
+    fireEvent.click(confirmBtn)
+
+    await waitFor(() => {
+      expect(mockEmptyMutate).toHaveBeenCalled()
     })
   })
 })

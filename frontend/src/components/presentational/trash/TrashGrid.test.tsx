@@ -1,6 +1,6 @@
 import React from 'react'
 import { describe, it, expect, vi } from 'vitest'
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import '@testing-library/jest-dom'
 import { TrashGrid } from './TrashGrid'
 import type { Note } from '@/types/note'
@@ -21,6 +21,7 @@ describe('TrashGrid', () => {
         onRetry={vi.fn()}
         onRestore={vi.fn()}
         onDeletePermanently={vi.fn()}
+        onEmptyTrash={vi.fn()}
       />
     )
 
@@ -41,6 +42,7 @@ describe('TrashGrid', () => {
         onRetry={onRetry}
         onRestore={vi.fn()}
         onDeletePermanently={vi.fn()}
+        onEmptyTrash={vi.fn()}
       />
     )
 
@@ -60,6 +62,7 @@ describe('TrashGrid', () => {
         onRetry={vi.fn()}
         onRestore={vi.fn()}
         onDeletePermanently={vi.fn()}
+        onEmptyTrash={vi.fn()}
       />
     )
 
@@ -67,9 +70,10 @@ describe('TrashGrid', () => {
     expect(screen.getByText(/Notes you delete will appear here/i)).toBeInTheDocument()
   })
 
-  it('renders grid of TrashCard components when notes exist', () => {
+  it('renders grid of TrashCard components and supports Empty Trash trigger action flow', async () => {
     const onRestore = vi.fn()
     const onDeletePermanently = vi.fn()
+    const onEmptyTrash = vi.fn()
 
     render(
       <TrashGrid
@@ -80,10 +84,25 @@ describe('TrashGrid', () => {
         onRetry={vi.fn()}
         onRestore={onRestore}
         onDeletePermanently={onDeletePermanently}
+        onEmptyTrash={onEmptyTrash}
       />
     )
 
     expect(screen.getByText('Deleted A')).toBeInTheDocument()
     expect(screen.getByText('Deleted B')).toBeInTheDocument()
+    expect(screen.getByText('2 notes found in trash')).toBeInTheDocument()
+
+    // Trigger Empty Trash dialogue confirmation flow
+    const emptyBtn = screen.getByRole('button', { name: /Empty Trash/i })
+    fireEvent.click(emptyBtn)
+
+    expect(screen.getByText('Empty Trash Permanently?')).toBeInTheDocument()
+
+    const confirmBtn = screen.getByRole('button', { name: 'Empty Trash' })
+    fireEvent.click(confirmBtn)
+
+    await waitFor(() => {
+      expect(onEmptyTrash).toHaveBeenCalled()
+    })
   })
 })
