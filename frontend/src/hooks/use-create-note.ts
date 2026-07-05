@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { createNote } from '@/services/note-api'
 import type { Note, CreateNoteInput, PaginatedNotes } from '@/types/note'
-import { toast } from '@/components/ui/toast'
+import { toast } from '@/components/ui/shadcn/toast'
 
 export function useCreateNote(options?: { onSuccess?: () => void }) {
   const queryClient = useQueryClient()

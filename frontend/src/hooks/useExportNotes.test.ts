@@ -2,13 +2,13 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { renderHook, act, waitFor } from '@testing-library/react'
 import { useExportNotes } from './useExportNotes'
 import { exportNotes } from '@/services/note-api'
-import { toast } from '@/components/ui/toast'
+import { toast } from '@/components/ui/shadcn/toast'
 
 vi.mock('@/services/note-api', () => ({
   exportNotes: vi.fn(),
 }))
 
-vi.mock('@/components/ui/toast', () => ({
+vi.mock('@/components/ui/shadcn/toast', () => ({
   toast: {
     success: vi.fn(),
     error: vi.fn(),

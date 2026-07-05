@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { updateNote } from '@/services/note-api'
 import type { CreateNoteInput } from '@/types/note'
-import { toast } from '@/components/ui/toast'
+import { toast } from '@/components/ui/shadcn/toast'
 
 export function useUpdateNote() {
   const queryClient = useQueryClient()

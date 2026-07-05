@@ -4,8 +4,8 @@ import {
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
-} from '@/components/ui/dropdown'
-import { Card } from '@/components/ui/card'
+} from '@/components/ui/shadcn/dropdown'
+import { Card } from '@/components/ui/shadcn/card'
 import type { Note } from '@/types/note'
 import { getMarkdownPreview, formatRelativeTime } from '@/lib/utils'
 

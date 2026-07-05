@@ -1,4 +1,4 @@
-import { SectionHeader } from '@/components/ui/section-header'
+import { SectionHeader } from '@/components/shared/section-header'
 import { TrashContainer } from '@/containers/trash'
 
 export function TrashPage() {

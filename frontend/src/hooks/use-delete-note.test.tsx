@@ -4,13 +4,13 @@ import { renderHook, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { useDeleteNote } from './use-delete-note'
 import { deleteNote } from '@/services/note-api'
-import { toast } from '@/components/ui/toast'
+import { toast } from '@/components/ui/shadcn/toast'
 
 vi.mock('@/services/note-api', () => ({
   deleteNote: vi.fn(),
 }))
 
-vi.mock('@/components/ui/toast', () => ({
+vi.mock('@/components/ui/shadcn/toast', () => ({
   toast: {
     success: vi.fn(),
     error: vi.fn(),

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useLocation } from 'react-router'
 import { Menu, PanelLeft, Search, Sun, Moon, Keyboard } from 'lucide-react'
-import { Button } from '../ui/button'
+import { Button } from '@/components/ui/shadcn/button'
 import { KeyboardShortcutsDialog } from './keyboard-shortcuts-dialog'
 
 interface HeaderProps {

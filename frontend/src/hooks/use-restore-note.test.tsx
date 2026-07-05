@@ -4,13 +4,13 @@ import { renderHook, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { useRestoreNote } from './use-restore-note'
 import { restoreNote } from '@/services/note-api'
-import { toast } from '@/components/ui/toast'
+import { toast } from '@/components/ui/shadcn/toast'
 
 vi.mock('@/services/note-api', () => ({
   restoreNote: vi.fn(),
 }))
 
-vi.mock('@/components/ui/toast', () => ({
+vi.mock('@/components/ui/shadcn/toast', () => ({
   toast: {
     success: vi.fn(),
     error: vi.fn(),

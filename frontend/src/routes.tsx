@@ -8,7 +8,7 @@ const TrashPage = lazy(() => import('./pages/trash').then((m) => ({ default: m.T
 const ExportImportPage = lazy(() => import('./pages/export-import').then((m) => ({ default: m.ExportImportPage })))
 const NotFoundPage = lazy(() => import('./pages/not-found').then((m) => ({ default: m.NotFoundPage })))
 
-import { ErrorBoundary } from './components/ui/error-boundary'
+import { ErrorBoundary } from './components/shared/error-boundary'
 
 export const router = createBrowserRouter([
   {

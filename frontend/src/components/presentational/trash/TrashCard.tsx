@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { RotateCcw, Trash2, Clock, AlertTriangle } from 'lucide-react'
-import { Card } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/shadcn/card'
+import { Button } from '@/components/ui/shadcn/button'
 import {
   Dialog,
   DialogContent,
@@ -9,7 +9,7 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
-} from '@/components/ui/dialog'
+} from '@/components/ui/shadcn/dialog'
 import type { Note } from '@/types/note'
 import { getMarkdownPreview, formatRelativeTime } from '@/lib/utils'
 

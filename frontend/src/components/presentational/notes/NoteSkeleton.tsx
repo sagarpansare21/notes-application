@@ -1,4 +1,4 @@
-import { Card } from '@/components/ui/card'
+import { Card } from '@/components/ui/shadcn/card'
 
 interface NoteSkeletonProps {
   viewMode?: 'grid' | 'list'

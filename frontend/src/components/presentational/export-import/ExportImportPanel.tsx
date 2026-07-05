@@ -1,7 +1,7 @@
 import React from 'react'
 import { UploadCloud, FileJson, FileText, CheckCircle2, AlertTriangle, Download } from 'lucide-react'
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/shadcn/card'
+import { Button } from '@/components/ui/shadcn/button'
 
 interface ExportImportPanelProps {
   // Import states

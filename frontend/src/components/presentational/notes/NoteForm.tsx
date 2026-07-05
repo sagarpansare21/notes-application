@@ -3,9 +3,9 @@ import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { createNoteSchema, type CreateNoteFormValues } from '@/lib/validation/note'
 import { cn } from '@/lib/utils'
-import { Input } from '../../ui/input'
-import { Button } from '../../ui/button'
-import { MarkdownEditor } from '../../ui/markdown-editor'
+import { Input } from '@/components/ui/shadcn/input'
+import { Button } from '@/components/ui/shadcn/button'
+import { MarkdownEditor } from '@/components/shared/markdown-editor'
 
 interface NoteFormProps {
   onSubmit: (data: { title: string; content: string; tags: string[] }) => void

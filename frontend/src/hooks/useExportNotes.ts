@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { exportNotes } from '@/services/note-api'
-import { toast } from '@/components/ui/toast'
+import { toast } from '@/components/ui/shadcn/toast'
 
 export function useExportNotes() {
   const [isExporting, setIsExporting] = useState(false)

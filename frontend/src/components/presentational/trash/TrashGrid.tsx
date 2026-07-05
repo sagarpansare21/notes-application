@@ -1,11 +1,11 @@
 import { useState } from 'react'
 import { Trash as TrashIcon, Trash2, AlertTriangle } from 'lucide-react'
 import type { Note } from '@/types/note'
-import { Card } from '@/components/ui/card'
-import { EmptyState } from '@/components/ui/empty-state'
-import { ErrorState } from '@/components/ui/error-state'
-import { SkeletonLine, SkeletonCircle } from '@/components/ui/skeleton'
-import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/shadcn/card'
+import { EmptyState } from '@/components/shared/empty-state'
+import { ErrorState } from '@/components/shared/error-state'
+import { SkeletonLine, SkeletonCircle } from '@/components/ui/shadcn/skeleton'
+import { Button } from '@/components/ui/shadcn/button'
 import {
   Dialog,
   DialogContent,
@@ -13,7 +13,7 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
-} from '@/components/ui/dialog'
+} from '@/components/ui/shadcn/dialog'
 import { TrashCard } from './TrashCard'
 
 interface TrashGridProps {

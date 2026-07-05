@@ -5,7 +5,7 @@ import {
   DrawerHeader,
   DrawerTitle,
   DrawerDescription,
-} from '../../ui/drawer'
+} from '@/components/ui/shadcn/drawer'
 import { NoteForm } from './NoteForm'
 
 interface CreateNoteDrawerProps {

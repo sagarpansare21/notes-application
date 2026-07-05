@@ -1,20 +1,20 @@
 import { useState, useEffect, useRef } from 'react'
 import { Search, Grid, List, ArrowUp, ArrowDown, Download, Filter } from 'lucide-react'
-import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/shadcn/input'
+import { Button } from '@/components/ui/shadcn/button'
 import {
   Select,
   SelectTrigger,
   SelectValue,
   SelectContent,
   SelectItem,
-} from '@/components/ui/select'
+} from '@/components/ui/shadcn/select'
 import {
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
-} from '@/components/ui/dropdown'
+} from '@/components/ui/shadcn/dropdown'
 
 interface NotesToolbarProps {
   search: string

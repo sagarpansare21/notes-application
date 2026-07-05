@@ -4,13 +4,13 @@ import { renderHook, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { useDeletePermanently } from './use-delete-permanently'
 import { deleteNotePermanently } from '@/services/note-api'
-import { toast } from '@/components/ui/toast'
+import { toast } from '@/components/ui/shadcn/toast'
 
 vi.mock('@/services/note-api', () => ({
   deleteNotePermanently: vi.fn(),
 }))
 
-vi.mock('@/components/ui/toast', () => ({
+vi.mock('@/components/ui/shadcn/toast', () => ({
   toast: {
     success: vi.fn(),
     error: vi.fn(),

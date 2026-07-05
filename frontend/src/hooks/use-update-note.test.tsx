@@ -4,13 +4,13 @@ import { renderHook, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { useUpdateNote } from './use-update-note'
 import { updateNote } from '@/services/note-api'
-import { toast } from '@/components/ui/toast'
+import { toast } from '@/components/ui/shadcn/toast'
 import type { Note } from '@/types/note'
 
 vi.mock('@/services/note-api', () => ({
     updateNote: vi.fn(),
 }))
-vi.mock('@/components/ui/toast', () => ({
+vi.mock('@/components/ui/shadcn/toast', () => ({
     toast: {
         success: vi.fn(),
         error: vi.fn(),

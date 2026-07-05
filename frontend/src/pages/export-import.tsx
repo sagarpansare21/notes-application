@@ -1,4 +1,4 @@
-import { SectionHeader } from '@/components/ui/section-header'
+import { SectionHeader } from '@/components/shared/section-header'
 import { ExportImportContainer } from '@/containers/export-import'
 
 export function ExportImportPage() {

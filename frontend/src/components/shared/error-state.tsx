@@ -1,7 +1,7 @@
 import React from 'react'
 import { AlertCircle, RefreshCcw, WifiOff } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { Button } from './button'
+import { Button } from '@/components/ui/shadcn/button'
 
 interface ErrorStateProps extends React.HTMLAttributes<HTMLDivElement> {
   title?: string

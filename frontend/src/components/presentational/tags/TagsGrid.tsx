@@ -1,10 +1,10 @@
 import { Tag as TagIcon } from 'lucide-react'
 import type { Tag } from '@/types/note'
-import { Card } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { EmptyState } from '@/components/ui/empty-state'
-import { ErrorState } from '@/components/ui/error-state'
-import { SkeletonLine } from '@/components/ui/skeleton'
+import { Card } from '@/components/ui/shadcn/card'
+import { Badge } from '@/components/ui/shadcn/badge'
+import { EmptyState } from '@/components/shared/empty-state'
+import { ErrorState } from '@/components/shared/error-state'
+import { SkeletonLine } from '@/components/ui/shadcn/skeleton'
 
 interface TagsGridProps {
   tags?: Tag[]
