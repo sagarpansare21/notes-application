@@ -20,9 +20,11 @@ createRoot(document.getElementById('root')!).render(
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker
-      .register('/sw.js')
+      .register('/sw.js', { updateViaCache: 'none' })
       .then((reg) => {
         console.log('Service Worker registered successfully with scope:', reg.scope)
+        // Force check for updates on reload/load
+        reg.update().catch(console.error)
       })
       .catch((err) => {
         console.error('Service Worker registration failed:', err)

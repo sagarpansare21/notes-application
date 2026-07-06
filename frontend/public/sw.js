@@ -32,9 +32,6 @@ self.addEventListener('activate', (event) => {
           }
         })
       )
-    }).then(() => {
-      // Claim clients immediately so the page doesn't need a reload
-      return self.clients.claim()
     })
   )
 })
@@ -50,8 +47,8 @@ self.addEventListener('fetch', (event) => {
 
   // Bypasses APIs, hot reload streams, and prisma studio (don't cache backend request pipelines)
   if (
-    requestUrl.pathname.startsWith('/api/') || 
-    requestUrl.pathname.startsWith('/v1/') ||
+    requestUrl.pathname.startsWith('/api') || 
+    requestUrl.pathname.startsWith('/v1') ||
     requestUrl.port === '3000' || 
     requestUrl.pathname.includes('@vite') ||
     requestUrl.pathname.includes('hot-update')
