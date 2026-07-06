@@ -25,6 +25,19 @@ if ('serviceWorker' in navigator) {
         console.log('Service Worker registered successfully with scope:', reg.scope)
         // Force check for updates on reload/load
         reg.update().catch(console.error)
+
+        // Listen for new service workers waiting to activate
+        reg.addEventListener('updatefound', () => {
+          const newWorker = reg.installing
+          if (newWorker) {
+            newWorker.addEventListener('statechange', () => {
+              if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                console.log('New service worker available, force refreshing to activate...')
+                window.location.reload()
+              }
+            })
+          }
+        })
       })
       .catch((err) => {
         console.error('Service Worker registration failed:', err)

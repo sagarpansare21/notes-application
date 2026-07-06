@@ -31,6 +31,7 @@ export function EditNoteContainer({ note, open, onOpenChange }: EditNoteContaine
         setTimeout(() => setAutoSaveStatus('idle'), 2000)
       } catch {
         setAutoSaveStatus('error')
+        setTimeout(() => setAutoSaveStatus('idle'), 3000)
       }
     },
     [note, updateMutation]
@@ -46,6 +47,7 @@ export function EditNoteContainer({ note, open, onOpenChange }: EditNoteContaine
         onOpenChange(false)
       } catch {
         setAutoSaveStatus('error')
+        setTimeout(() => setAutoSaveStatus('idle'), 3000)
       }
     },
     [note, updateMutation, onOpenChange]

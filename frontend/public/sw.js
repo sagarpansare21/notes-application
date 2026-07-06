@@ -32,6 +32,9 @@ self.addEventListener('activate', (event) => {
           }
         })
       )
+    }).then(() => {
+      // Claim clients immediately so the page doesn't need a reload
+      return self.clients.claim()
     })
   )
 })
