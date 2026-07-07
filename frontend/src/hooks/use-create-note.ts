@@ -79,7 +79,6 @@ export function useCreateNote(options?: { onSuccess?: () => void }) {
     onSettled: () => {
       if (navigator.onLine) {
         queryClient.invalidateQueries({ queryKey: ['notes'] })
-        queryClient.invalidateQueries({ queryKey: ['dashboard'] })
         queryClient.invalidateQueries({ queryKey: ['tags'] })
       }
     },

@@ -66,7 +66,6 @@ describe('useCreateNote', () => {
     expect(onSuccess).toHaveBeenCalled()
 
     expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['notes'] })
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['dashboard'] })
     expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['tags'] })
   })
 

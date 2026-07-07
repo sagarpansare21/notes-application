@@ -12,6 +12,7 @@ import {
   getLocalNote,
   upsertLocalNote,
   deleteLocalNote,
+  updateSyncQueueTempId,
 } from '@/lib/local-db'
 import { toast } from '@/components/ui/shadcn/toast'
 
@@ -32,6 +33,7 @@ vi.mock('@/lib/local-db', () => ({
   upsertLocalNote: vi.fn().mockResolvedValue(undefined),
   deleteLocalNote: vi.fn().mockResolvedValue(undefined),
   getLocalNotes: vi.fn(),
+  updateSyncQueueTempId: vi.fn().mockResolvedValue(undefined),
 }))
 
 vi.mock('@/components/ui/shadcn/toast', () => ({
@@ -215,5 +217,59 @@ describe('useSyncQueue', () => {
 
     expect(useSyncStore.getState().pendingCount).toBe(2)
     unmount()
+  })
+
+  it('drains queue successfully replacing tempId with realId in subsequent entries', async () => {
+    const mockEntries = [
+      {
+        id: 'sync-1',
+        type: 'create' as const,
+        payload: { title: 'New', content: 'New content' },
+        tempId: 'optimistic-1',
+        createdAt: 1000,
+      },
+      {
+        id: 'sync-2',
+        type: 'update' as const,
+        noteId: 'optimistic-1',
+        payload: { content: 'Updated content' },
+        createdAt: 2000,
+      },
+    ]
+
+    vi.mocked(getAllSyncEntries).mockResolvedValue(mockEntries)
+    vi.mocked(getSyncQueueCount).mockResolvedValue(0)
+
+    const createdNote = { id: 'real-1', title: 'New', content: 'New content', tags: [], createdAt: '', updatedAt: '' }
+    vi.mocked(createNote).mockResolvedValue(createdNote)
+    vi.mocked(getLocalNote).mockImplementation(async (id) => {
+      if (id === 'optimistic-1') {
+        return { id: 'optimistic-1', title: 'New', content: 'New content', tags: [], createdAt: '', updatedAt: '' }
+      }
+      return undefined
+    })
+
+    const updatedNote = { id: 'real-1', title: 'New', content: 'Updated content', tags: [], createdAt: '', updatedAt: '' }
+    vi.mocked(updateNote).mockResolvedValue(updatedNote)
+
+    const { result } = renderHook(() => useSyncQueue(), { wrapper })
+
+    await act(async () => {
+      await result.current.drainQueue()
+    })
+
+    // Assert API calls
+    expect(createNote).toHaveBeenCalledWith({ title: 'New', content: 'New content' })
+    expect(updateNote).toHaveBeenCalledWith('real-1', { content: 'Updated content' })
+
+    // Assert DB actions
+    expect(deleteLocalNote).toHaveBeenCalledWith('optimistic-1')
+    expect(upsertLocalNote).toHaveBeenCalledWith(createdNote)
+    expect(upsertLocalNote).toHaveBeenCalledWith(updatedNote)
+    expect(updateSyncQueueTempId).toHaveBeenCalledWith('optimistic-1', 'real-1')
+
+    // Dequeues
+    expect(dequeueSyncEntry).toHaveBeenCalledWith('sync-1')
+    expect(dequeueSyncEntry).toHaveBeenCalledWith('sync-2')
   })
 })

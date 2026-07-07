@@ -3,14 +3,16 @@ import { deleteNote } from '@/services/note-api'
 import { toast } from '@/components/ui/shadcn/toast'
 import { getLocalNote, upsertLocalNote, enqueueSync, generateSyncId } from '@/lib/local-db'
 import type { PaginatedNotes } from '@/types/note'
+import { useSyncStore } from './use-sync-store'
 
 export function useDeleteNote() {
   const queryClient = useQueryClient()
 
   return useMutation({
     mutationFn: async (id: string) => {
+      const realId = useSyncStore.getState().idMap[id] || id
       if (!navigator.onLine) {
-        const note = await getLocalNote(id)
+        const note = await getLocalNote(realId)
         if (note) {
           note.deletedAt = new Date().toISOString()
           await upsertLocalNote(note)
@@ -18,14 +20,15 @@ export function useDeleteNote() {
         await enqueueSync({
           id: generateSyncId(),
           type: 'delete',
-          noteId: id,
+          noteId: realId,
           createdAt: Date.now(),
         })
         return
       }
-      return deleteNote(id)
+      return deleteNote(realId)
     },
     onMutate: async (id) => {
+      const realId = useSyncStore.getState().idMap[id] || id
       await queryClient.cancelQueries({ queryKey: ['notes'] })
 
       const previousNotesQueries = queryClient.getQueriesData<PaginatedNotes>({ queryKey: ['notes'] })
@@ -34,7 +37,7 @@ export function useDeleteNote() {
         if (!oldData) return
         queryClient.setQueryData<PaginatedNotes>(queryKey, {
           ...oldData,
-          data: oldData.data.filter((n) => n.id !== id),
+          data: oldData.data.filter((n) => n.id !== id && n.id !== realId),
           total: Math.max(0, oldData.total - 1),
         })
       })
@@ -42,8 +45,9 @@ export function useDeleteNote() {
       return { previousNotesQueries }
     },
     onSuccess: (_, id) => {
+      const realId = useSyncStore.getState().idMap[id] || id
       // Soft delete: update deletedAt in localDb
-      getLocalNote(id).then((note) => {
+      getLocalNote(realId).then((note) => {
         if (note) {
           note.deletedAt = new Date().toISOString()
           upsertLocalNote(note).catch(console.error)
@@ -52,7 +56,6 @@ export function useDeleteNote() {
 
       if (navigator.onLine) {
         queryClient.invalidateQueries({ queryKey: ['notes'] })
-        queryClient.invalidateQueries({ queryKey: ['dashboard'] })
         queryClient.invalidateQueries({ queryKey: ['tags'] })
         toast.success('Note moved to trash')
       } else {

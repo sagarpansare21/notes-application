@@ -54,7 +54,6 @@ describe('useImportNotes', () => {
     expect(toast.success).toHaveBeenCalledWith('Import completed. Imported: 10, Skipped: 2, Failed: 0')
 
     expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['notes'] })
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['dashboard'] })
     expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['tags'] })
   })
 

@@ -9,7 +9,6 @@ export function useImportNotes() {
     mutationFn: (file: File) => importNotes(file),
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['notes'] })
-      queryClient.invalidateQueries({ queryKey: ['dashboard'] })
       queryClient.invalidateQueries({ queryKey: ['tags'] })
       toast.success(
         `Import completed. Imported: ${data.imported}, Skipped: ${data.skipped}, Failed: ${data.failed}`

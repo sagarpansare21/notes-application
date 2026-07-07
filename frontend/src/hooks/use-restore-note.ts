@@ -2,14 +2,16 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { restoreNote } from '@/services/note-api'
 import { toast } from '@/components/ui/shadcn/toast'
 import { getLocalNote, upsertLocalNote, enqueueSync, generateSyncId } from '@/lib/local-db'
+import { useSyncStore } from './use-sync-store'
 
 export function useRestoreNote() {
   const queryClient = useQueryClient()
 
   return useMutation({
     mutationFn: async (id: string) => {
+      const realId = useSyncStore.getState().idMap[id] || id
       if (!navigator.onLine) {
-        const note = await getLocalNote(id)
+        const note = await getLocalNote(realId)
         if (note) {
           note.deletedAt = null
           await upsertLocalNote(note)
@@ -17,15 +19,16 @@ export function useRestoreNote() {
         await enqueueSync({
           id: generateSyncId(),
           type: 'restore',
-          noteId: id,
+          noteId: realId,
           createdAt: Date.now(),
         })
         return
       }
-      return restoreNote(id)
+      return restoreNote(realId)
     },
     onSuccess: (_, id) => {
-      getLocalNote(id).then((note) => {
+      const realId = useSyncStore.getState().idMap[id] || id
+      getLocalNote(realId).then((note) => {
         if (note) {
           note.deletedAt = null
           upsertLocalNote(note).catch(console.error)
@@ -34,7 +37,6 @@ export function useRestoreNote() {
 
       queryClient.invalidateQueries({ queryKey: ['notes'] })
       queryClient.invalidateQueries({ queryKey: ['notes', 'trash'] })
-      queryClient.invalidateQueries({ queryKey: ['dashboard'] })
       queryClient.invalidateQueries({ queryKey: ['tags'] })
 
       if (navigator.onLine) {

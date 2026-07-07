@@ -53,7 +53,6 @@ describe('useRestoreNote', () => {
 
     expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['notes'] })
     expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['notes', 'trash'] })
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['dashboard'] })
     expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['tags'] })
   })
 

@@ -7,6 +7,7 @@ import {
   upsertLocalNote,
   deleteLocalNote,
   getLocalNotes,
+  updateSyncQueueTempId,
 } from '@/lib/local-db'
 import type { SyncQueueEntry } from '@/lib/local-db'
 import {
@@ -21,14 +22,14 @@ import { useQueryClient } from '@tanstack/react-query'
 import { toast } from '@/components/ui/shadcn/toast'
 import { useSyncStore } from './use-sync-store'
 
-async function processSyncEntry(entry: SyncQueueEntry): Promise<void> {
+async function processSyncEntry(entry: SyncQueueEntry): Promise<{ realId?: string } | undefined> {
   switch (entry.type) {
     case 'create': {
       const created = await createNote(entry.payload)
       const tempNote = await getLocalNote(entry.tempId)
       if (tempNote) await deleteLocalNote(entry.tempId)
       await upsertLocalNote(created)
-      break
+      return { realId: created.id }
     }
     case 'update': {
       const updated = await updateNote(entry.noteId, entry.payload)
@@ -87,11 +88,23 @@ export function useSyncQueue() {
     setSyncStatus('syncing')
 
     let failed = 0
+    const idMap = new Map<string, string>()
+
     for (const entry of entries) {
+      if (entry.type !== 'create' && entry.type !== 'empty-trash' && idMap.has(entry.noteId)) {
+        entry.noteId = idMap.get(entry.noteId)!
+      }
+
       try {
-        await processSyncEntry(entry)
+        const result = await processSyncEntry(entry)
+        if (entry.type === 'create' && result?.realId) {
+          idMap.set(entry.tempId, result.realId)
+          useSyncStore.getState().addIdMapping(entry.tempId, result.realId)
+          await updateSyncQueueTempId(entry.tempId, result.realId)
+        }
         await dequeueSyncEntry(entry.id)
-      } catch {
+      } catch (err) {
+        console.error(err)
         failed++
       }
     }

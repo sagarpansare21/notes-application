@@ -2,26 +2,29 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { deleteNotePermanently } from '@/services/note-api'
 import { toast } from '@/components/ui/shadcn/toast'
 import { deleteLocalNote, enqueueSync, generateSyncId } from '@/lib/local-db'
+import { useSyncStore } from './use-sync-store'
 
 export function useDeletePermanently() {
   const queryClient = useQueryClient()
 
   return useMutation({
     mutationFn: async (id: string) => {
+      const realId = useSyncStore.getState().idMap[id] || id
       if (!navigator.onLine) {
-        await deleteLocalNote(id)
+        await deleteLocalNote(realId)
         await enqueueSync({
           id: generateSyncId(),
           type: 'delete-permanently',
-          noteId: id,
+          noteId: realId,
           createdAt: Date.now(),
         })
         return
       }
-      return deleteNotePermanently(id)
+      return deleteNotePermanently(realId)
     },
     onSuccess: (_, id) => {
-      deleteLocalNote(id).catch(console.error)
+      const realId = useSyncStore.getState().idMap[id] || id
+      deleteLocalNote(realId).catch(console.error)
       queryClient.invalidateQueries({ queryKey: ['notes', 'trash'] })
       queryClient.invalidateQueries({ queryKey: ['tags'] })
       if (navigator.onLine) {

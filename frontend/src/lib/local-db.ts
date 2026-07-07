@@ -135,3 +135,23 @@ export async function clearSyncQueue(): Promise<void> {
 export function generateSyncId(): string {
   return `sync-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
 }
+
+export async function updateSyncQueueTempId(tempId: string, realId: string): Promise<void> {
+  const db = await getDB()
+  const tx = db.transaction('sync-queue', 'readwrite')
+  const store = tx.objectStore('sync-queue')
+  const entries = await store.getAll()
+
+  for (const entry of entries) {
+    let updated = false
+    if (entry.type !== 'create' && entry.type !== 'empty-trash' && entry.noteId === tempId) {
+      entry.noteId = realId
+      updated = true
+    }
+    if (updated) {
+      await store.put(entry)
+    }
+  }
+  await tx.done
+}
+

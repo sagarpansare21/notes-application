@@ -52,7 +52,6 @@ describe('useDeleteNote', () => {
     expect(toast.success).toHaveBeenCalledWith('Note moved to trash')
 
     expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['notes'] })
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['dashboard'] })
     expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['tags'] })
   })
 

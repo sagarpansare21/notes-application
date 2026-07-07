@@ -3,15 +3,17 @@ import { updateNote } from '@/services/note-api'
 import type { Note, CreateNoteInput, PaginatedNotes } from '@/types/note'
 import { toast } from '@/components/ui/shadcn/toast'
 import { upsertLocalNote, enqueueSync, generateSyncId, getLocalNote } from '@/lib/local-db'
+import { useSyncStore } from './use-sync-store'
 
 export function useUpdateNote() {
   const queryClient = useQueryClient()
 
   return useMutation({
     mutationFn: async ({ id, data }: { id: string; data: Partial<CreateNoteInput> }) => {
+      const realId = useSyncStore.getState().idMap[id] || id
       if (!navigator.onLine) {
         // Update locally and queue for sync
-        const existing = await getLocalNote(id)
+        const existing = await getLocalNote(realId)
         const updatedNote: Note = existing
           ? {
               ...existing,
@@ -20,7 +22,7 @@ export function useUpdateNote() {
               updatedAt: new Date().toISOString(),
             }
           : {
-              id,
+              id: realId,
               title: data.title ?? '',
               content: data.content ?? '',
               tags: data.tags ?? [],
@@ -31,15 +33,16 @@ export function useUpdateNote() {
         await enqueueSync({
           id: generateSyncId(),
           type: 'update',
-          noteId: id,
+          noteId: realId,
           payload: data,
           createdAt: Date.now(),
         })
         return updatedNote
       }
-      return updateNote(id, data)
+      return updateNote(realId, data)
     },
     onMutate: async ({ id, data }) => {
+      const realId = useSyncStore.getState().idMap[id] || id
       await queryClient.cancelQueries({ queryKey: ['notes'] })
 
       const previousNotesQueries = queryClient.getQueriesData<PaginatedNotes>({ queryKey: ['notes'] })
@@ -50,7 +53,7 @@ export function useUpdateNote() {
         queryClient.setQueryData<PaginatedNotes>(queryKey, {
           ...oldData,
           data: oldData.data.map((n) =>
-            n.id === id ? { ...n, ...data, updatedAt: new Date().toISOString() } : n
+            n.id === id || n.id === realId ? { ...n, ...data, updatedAt: new Date().toISOString() } : n
           ),
         })
       })
