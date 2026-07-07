@@ -10,25 +10,25 @@ export function useUpdateNote() {
 
   return useMutation({
     mutationFn: async ({ id, data }: { id: string; data: Partial<CreateNoteInput> }) => {
-      const realId = useSyncStore.getState().idMap[id] || id
+      const realId = useSyncStore.getState().idMap?.[id] || id
       if (!navigator.onLine) {
         // Update locally and queue for sync
         const existing = await getLocalNote(realId)
         const updatedNote: Note = existing
           ? {
-              ...existing,
-              ...data,
-              tags: data.tags ?? existing.tags,
-              updatedAt: new Date().toISOString(),
-            }
+            ...existing,
+            ...data,
+            tags: data.tags ?? existing.tags,
+            updatedAt: new Date().toISOString(),
+          }
           : {
-              id: realId,
-              title: data.title ?? '',
-              content: data.content ?? '',
-              tags: data.tags ?? [],
-              createdAt: new Date().toISOString(),
-              updatedAt: new Date().toISOString(),
-            }
+            id: realId,
+            title: data.title ?? '',
+            content: data.content ?? '',
+            tags: data.tags ?? [],
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          }
         await upsertLocalNote(updatedNote)
         await enqueueSync({
           id: generateSyncId(),
@@ -42,20 +42,34 @@ export function useUpdateNote() {
       return updateNote(realId, data)
     },
     onMutate: async ({ id, data }) => {
-      const realId = useSyncStore.getState().idMap[id] || id
+      const realId = useSyncStore.getState().idMap?.[id] || id
       await queryClient.cancelQueries({ queryKey: ['notes'] })
 
-      const previousNotesQueries = queryClient.getQueriesData<PaginatedNotes>({ queryKey: ['notes'] })
+      const previousNotesQueries = queryClient.getQueriesData<any>({ queryKey: ['notes'] })
 
       // Optimistically update the note in all cached query results
       previousNotesQueries.forEach(([queryKey, oldData]) => {
         if (!oldData) return
-        queryClient.setQueryData<PaginatedNotes>(queryKey, {
-          ...oldData,
-          data: oldData.data.map((n) =>
-            n.id === id || n.id === realId ? { ...n, ...data, updatedAt: new Date().toISOString() } : n
-          ),
-        })
+
+        if (queryKey[1] === 'trash') {
+          // Trash notes cache is Note[]
+          const trashData = oldData as Note[]
+          queryClient.setQueryData<Note[]>(queryKey,
+            trashData.map((n) =>
+              n.id === id || n.id === realId ? { ...n, ...data, updatedAt: new Date().toISOString() } : n
+            )
+          )
+        } else {
+          // Standard notes cache is PaginatedNotes
+          const notesData = oldData as PaginatedNotes
+          if (!notesData.data) return
+          queryClient.setQueryData<PaginatedNotes>(queryKey, {
+            ...notesData,
+            data: notesData.data.map((n) =>
+              n.id === id || n.id === realId ? { ...n, ...data, updatedAt: new Date().toISOString() } : n
+            ),
+          })
+        }
       })
 
       return { previousNotesQueries }

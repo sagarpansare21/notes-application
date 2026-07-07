@@ -9,7 +9,7 @@ export function useDeletePermanently() {
 
   return useMutation({
     mutationFn: async (id: string) => {
-      const realId = useSyncStore.getState().idMap[id] || id
+      const realId = useSyncStore.getState().idMap?.[id] || id
       if (!navigator.onLine) {
         await deleteLocalNote(realId)
         await enqueueSync({
@@ -23,7 +23,7 @@ export function useDeletePermanently() {
       return deleteNotePermanently(realId)
     },
     onSuccess: (_, id) => {
-      const realId = useSyncStore.getState().idMap[id] || id
+      const realId = useSyncStore.getState().idMap?.[id] || id
       deleteLocalNote(realId).catch(console.error)
       queryClient.invalidateQueries({ queryKey: ['notes', 'trash'] })
       queryClient.invalidateQueries({ queryKey: ['tags'] })

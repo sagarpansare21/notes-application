@@ -47,10 +47,16 @@ export function useCreateNote(options?: { onSuccess?: () => void }) {
 
       previousNotesQueries.forEach(([queryKey, oldData]) => {
         if (!oldData) return
+
+        // Skip trash notes cache as it is Note[] and new notes shouldn't be added to trash
+        if (queryKey[1] === 'trash') return
+
+        const notesData = oldData as PaginatedNotes
+        if (!notesData.data) return
         queryClient.setQueryData<PaginatedNotes>(queryKey, {
-          ...oldData,
-          data: [optimisticNote, ...oldData.data],
-          total: oldData.total + 1,
+          ...notesData,
+          data: [optimisticNote, ...notesData.data],
+          total: notesData.total + 1,
         })
       })
 

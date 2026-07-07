@@ -9,7 +9,7 @@ export function useRestoreNote() {
 
   return useMutation({
     mutationFn: async (id: string) => {
-      const realId = useSyncStore.getState().idMap[id] || id
+      const realId = useSyncStore.getState().idMap?.[id] || id
       if (!navigator.onLine) {
         const note = await getLocalNote(realId)
         if (note) {
@@ -27,7 +27,7 @@ export function useRestoreNote() {
       return restoreNote(realId)
     },
     onSuccess: (_, id) => {
-      const realId = useSyncStore.getState().idMap[id] || id
+      const realId = useSyncStore.getState().idMap?.[id] || id
       getLocalNote(realId).then((note) => {
         if (note) {
           note.deletedAt = null

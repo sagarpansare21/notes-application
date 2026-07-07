@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { deleteNote } from '@/services/note-api'
 import { toast } from '@/components/ui/shadcn/toast'
 import { getLocalNote, upsertLocalNote, enqueueSync, generateSyncId } from '@/lib/local-db'
-import type { PaginatedNotes } from '@/types/note'
+import type { PaginatedNotes, Note } from '@/types/note'
 import { useSyncStore } from './use-sync-store'
 
 export function useDeleteNote() {
@@ -10,7 +10,7 @@ export function useDeleteNote() {
 
   return useMutation({
     mutationFn: async (id: string) => {
-      const realId = useSyncStore.getState().idMap[id] || id
+      const realId = useSyncStore.getState().idMap?.[id] || id
       if (!navigator.onLine) {
         const note = await getLocalNote(realId)
         if (note) {
@@ -28,24 +28,34 @@ export function useDeleteNote() {
       return deleteNote(realId)
     },
     onMutate: async (id) => {
-      const realId = useSyncStore.getState().idMap[id] || id
+      const realId = useSyncStore.getState().idMap?.[id] || id
       await queryClient.cancelQueries({ queryKey: ['notes'] })
 
-      const previousNotesQueries = queryClient.getQueriesData<PaginatedNotes>({ queryKey: ['notes'] })
+      const previousNotesQueries = queryClient.getQueriesData<any>({ queryKey: ['notes'] })
 
       previousNotesQueries.forEach(([queryKey, oldData]) => {
         if (!oldData) return
-        queryClient.setQueryData<PaginatedNotes>(queryKey, {
-          ...oldData,
-          data: oldData.data.filter((n) => n.id !== id && n.id !== realId),
-          total: Math.max(0, oldData.total - 1),
-        })
+
+        if (queryKey[1] === 'trash') {
+          const trashData = oldData as Note[]
+          queryClient.setQueryData<Note[]>(queryKey,
+            trashData.filter((n) => n.id !== id && n.id !== realId)
+          )
+        } else {
+          const notesData = oldData as PaginatedNotes
+          if (!notesData.data) return
+          queryClient.setQueryData<PaginatedNotes>(queryKey, {
+            ...notesData,
+            data: notesData.data.filter((n) => n.id !== id && n.id !== realId),
+            total: Math.max(0, notesData.total - 1),
+          })
+        }
       })
 
       return { previousNotesQueries }
     },
     onSuccess: (_, id) => {
-      const realId = useSyncStore.getState().idMap[id] || id
+      const realId = useSyncStore.getState().idMap?.[id] || id
       // Soft delete: update deletedAt in localDb
       getLocalNote(realId).then((note) => {
         if (note) {
